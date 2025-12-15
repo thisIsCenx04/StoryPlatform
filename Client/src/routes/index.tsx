@@ -12,6 +12,7 @@ import StoryDetailPage from '../pages/StoryDetail/StoryDetailPage'
 import StoryManagementPage from '../pages/Admin/StoryManagementPage'
 import StoryCreatePage from '../pages/Admin/StoryCreatePage'
 import StoryEditPage from '../pages/Admin/StoryEditPage'
+import CategoryManagementPage from '../pages/Admin/CategoryManagementPage'
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
@@ -56,6 +57,7 @@ const AppRoutes = () => (
         <Route path="/admin/stories" element={<StoryManagementPage />} />
         <Route path="/admin/stories/create" element={<StoryCreatePage />} />
         <Route path="/admin/stories/:id/edit" element={<StoryEditPage />} />
+        <Route path="/admin/categories" element={<CategoryManagementPage />} />
       </Route>
     </Route>
 

@@ -1,5 +1,5 @@
 import { buildApiUrl } from '../../config/apiConfig'
-import type { Story, StoryRequestPayload, Category, StorySummarySection } from '../../types/story'
+import type { Story, StoryRequestPayload, StorySummarySection } from '../../types/story'
 import { authStore } from '../../store/authStore'
 
 const authHeaders = (): Record<string, string> => {
@@ -71,13 +71,5 @@ export const storyApi = {
     })
     if (!res.ok) throw new Error('Cập nhật tóm tắt thất bại')
     return (await res.json()) as StorySummarySection[]
-  },
-}
-
-export const categoryApi = {
-  async list(): Promise<Category[]> {
-    const res = await fetch(buildApiUrl('/api/categories'))
-    if (!res.ok) throw new Error('Không thể tải thể loại')
-    return (await res.json()) as Category[]
   },
 }

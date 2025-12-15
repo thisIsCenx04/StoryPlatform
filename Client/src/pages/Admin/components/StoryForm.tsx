@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 
-import { categoryApi } from '../../../services/api/storyApi'
-import type { Category, Story, StoryRequestPayload, StoryStatus, StorySummarySection } from '../../../types/story'
+import { categoryApi } from '../../../services/api/categoryApi'
+import type { Category } from '../../../types/category'
+import type { Story, StoryRequestPayload, StoryStatus, StorySummarySection } from '../../../types/story'
 import StoryStatusBadge from '../../../components/story/StoryStatusBadge'
 import StorySummaryEditor from '../../../components/story/StorySummaryEditor'
 

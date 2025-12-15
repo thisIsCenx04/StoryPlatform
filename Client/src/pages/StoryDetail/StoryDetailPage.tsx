@@ -3,19 +3,36 @@ import { useParams } from 'react-router-dom'
 
 import StoryStatusBadge from '../../components/story/StoryStatusBadge'
 import StorySummaryView from '../../components/story/StorySummaryView'
+import ArticleJsonLd from '../../components/seo/ArticleJsonLd'
+import BreadcrumbJsonLd from '../../components/seo/BreadcrumbJsonLd'
 import { storyApi } from '../../services/api/storyApi'
+import { seoApi } from '../../services/api/seoApi'
 import type { Story } from '../../types/story'
+import type { SeoArticle, SeoBreadcrumbList } from '../../types/seo'
 
 const StoryDetailPage = () => {
   const { slug } = useParams<{ slug: string }>()
   const [story, setStory] = useState<Story | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [articleSeo, setArticleSeo] = useState<SeoArticle | null>(null)
+  const [breadcrumb, setBreadcrumb] = useState<SeoBreadcrumbList | null>(null)
 
   useEffect(() => {
     if (!slug) return
     storyApi
       .getBySlug(slug)
-      .then(setStory)
+      .then((s) => {
+        setStory(s)
+        return Promise.allSettled([
+          seoApi.getArticle(slug),
+          seoApi.getBreadcrumb({ canonicalUrl: window.location.href }),
+        ])
+      })
+      .then((results) => {
+        const [articleResult, breadcrumbResult] = results ?? []
+        if (articleResult?.status === 'fulfilled') setArticleSeo(articleResult.value)
+        if (breadcrumbResult?.status === 'fulfilled') setBreadcrumb(breadcrumbResult.value)
+      })
       .catch((err) => setError(err instanceof Error ? err.message : 'Không tìm thấy truyện'))
   }, [slug])
 
@@ -24,6 +41,8 @@ const StoryDetailPage = () => {
 
   return (
     <article className="space-y-4">
+      {articleSeo && <ArticleJsonLd article={articleSeo} />}
+      {breadcrumb && <BreadcrumbJsonLd breadcrumb={breadcrumb} />}
       <div className="flex flex-col md:flex-row gap-4">
         {story.coverImageUrl && (
           <img

@@ -4,6 +4,8 @@ import StoryFilterBar from '../../components/story/StoryFilterBar'
 import StoryList from '../../components/story/StoryList'
 import { storyApi } from '../../services/api/storyApi'
 import type { Story } from '../../types/story'
+import BreadcrumbJsonLd from '../../components/seo/BreadcrumbJsonLd'
+import { createSimpleBreadcrumb } from '../../utils/seoHelpers'
 
 const HomePage = () => {
   const [stories, setStories] = useState<Story[]>([])
@@ -31,8 +33,13 @@ const HomePage = () => {
     fetchStories()
   }, [])
 
+  const breadcrumb = createSimpleBreadcrumb([
+    { name: 'Trang chủ', url: typeof window !== 'undefined' ? window.location.href : '/' },
+  ])
+
   return (
     <section className="space-y-4">
+      <BreadcrumbJsonLd breadcrumb={breadcrumb} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">Truyện mới</h1>
       </div>

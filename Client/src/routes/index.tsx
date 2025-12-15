@@ -1,19 +1,17 @@
 import { useMemo } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 
-import MainLayout from '../layout/MainLayout'
-import AdminLayout from '../layout/AdminLayout'
-import AdminRoute from './AdminRoute'
-import { useAuth } from '../hooks/useAuth'
-import LoginPage from '../pages/Admin/LoginPage'
 import { apiConfig } from '../config/apiConfig'
-
-const HomePage = () => (
-  <section>
-    <h1 className="text-2xl font-semibold text-slate-900">Trang chủ</h1>
-    <p className="text-slate-600 mt-2">Danh sách truyện, đề xuất, hot, donate...</p>
-  </section>
-)
+import AdminLayout from '../layout/AdminLayout'
+import MainLayout from '../layout/MainLayout'
+import { useAuth } from '../hooks/useAuth'
+import AdminRoute from './AdminRoute'
+import LoginPage from '../pages/Admin/LoginPage'
+import HomePage from '../pages/Home/HomePage'
+import StoryDetailPage from '../pages/StoryDetail/StoryDetailPage'
+import StoryManagementPage from '../pages/Admin/StoryManagementPage'
+import StoryCreatePage from '../pages/Admin/StoryCreatePage'
+import StoryEditPage from '../pages/Admin/StoryEditPage'
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
@@ -46,6 +44,7 @@ const AppRoutes = () => (
   <Routes>
     <Route element={<MainLayout />}>
       <Route path="/" element={<HomePage />} />
+      <Route path="/stories/:slug" element={<StoryDetailPage />} />
     </Route>
 
     <Route path={apiConfig.adminLoginPagePath} element={<LoginPage />} />
@@ -54,6 +53,9 @@ const AppRoutes = () => (
       <Route element={<AdminLayout />}>
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/stories" element={<StoryManagementPage />} />
+        <Route path="/admin/stories/create" element={<StoryCreatePage />} />
+        <Route path="/admin/stories/:id/edit" element={<StoryEditPage />} />
       </Route>
     </Route>
 

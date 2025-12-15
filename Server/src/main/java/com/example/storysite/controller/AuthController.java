@@ -13,7 +13,7 @@ import com.example.storysite.service.AuthService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/__internal__/auth")
+@RequestMapping("${app.security.admin-login-path:/api/admin/auth/login}")
 public class AuthController {
 
     private final AuthService authService;
@@ -22,7 +22,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/admin/login")
+    @PostMapping
     public ResponseEntity<LoginResponse> adminLogin(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.adminLogin(request);
         return ResponseEntity.ok(response);

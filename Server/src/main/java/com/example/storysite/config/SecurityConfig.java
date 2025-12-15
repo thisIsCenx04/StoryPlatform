@@ -2,6 +2,7 @@ package com.example.storysite.config;
 
 import static org.springframework.http.HttpMethod.GET;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,14 +24,15 @@ import com.example.storysite.security.JwtAuthFilter;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    public static final String ADMIN_LOGIN_PATH = "/__internal__/auth/admin/login";
-
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final String adminLoginPath;
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter, CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, CustomUserDetailsService userDetailsService,
+            @Value("${app.security.admin-login-path:/api/admin/auth/login}") String adminLoginPath) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
+        this.adminLoginPath = adminLoginPath;
     }
 
     @Bean
@@ -40,7 +42,7 @@ public class SecurityConfig {
                 })
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ADMIN_LOGIN_PATH, "/actuator/health", "/health").permitAll()
+                        .requestMatchers(adminLoginPath, "/actuator/health", "/health").permitAll()
                         .requestMatchers(GET, "/api/public/**", "/api/story/**", "/api/category/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

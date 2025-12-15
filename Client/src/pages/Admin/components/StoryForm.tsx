@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { categoryApi } from '../../../services/api/storyApi'
 import type { Category, Story, StoryRequestPayload, StoryStatus, StorySummarySection } from '../../../types/story'
 import StoryStatusBadge from '../../../components/story/StoryStatusBadge'
+import StorySummaryEditor from '../../../components/story/StorySummaryEditor'
 
 interface Props {
   initialValue?: Story
@@ -51,28 +52,6 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
 
   const handleChange = (field: keyof StoryRequestPayload, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleSectionChange = (idx: number, field: keyof StorySummarySection, value: any) => {
-    setForm((prev) => {
-      const next = [...prev.summarySections]
-      next[idx] = { ...next[idx], [field]: value }
-      return { ...prev, summarySections: next }
-    })
-  }
-
-  const addSection = () => {
-    setForm((prev) => ({
-      ...prev,
-      summarySections: [...prev.summarySections, { sortOrder: prev.summarySections.length + 1, textContent: '', imageUrl: '' }],
-    }))
-  }
-
-  const removeSection = (idx: number) => {
-    setForm((prev) => ({
-      ...prev,
-      summarySections: prev.summarySections.filter((_, i) => i !== idx),
-    }))
   }
 
   const submit = async (event: React.FormEvent) => {
@@ -200,54 +179,10 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Tóm tắt</h3>
-          <button type="button" className="text-emerald-600 text-sm" onClick={addSection}>
-            + Thêm block
-          </button>
-        </div>
-        {form.summarySections.map((section, idx) => (
-          <div key={idx} className="border rounded p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-500">Block #{idx + 1}</span>
-              {form.summarySections.length > 1 && (
-                <button type="button" className="text-rose-600 text-xs" onClick={() => removeSection(idx)}>
-                  Xóa
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs mb-1">Thứ tự</label>
-                <input
-                  type="number"
-                  className="w-full border rounded px-2 py-1"
-                  value={section.sortOrder}
-                  onChange={(e) => handleSectionChange(idx, 'sortOrder', Number(e.target.value))}
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs mb-1">Ảnh</label>
-                <input
-                  className="w-full border rounded px-2 py-1"
-                  value={section.imageUrl || ''}
-                  onChange={(e) => handleSectionChange(idx, 'imageUrl', e.target.value)}
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs mb-1">Nội dung</label>
-              <textarea
-                className="w-full border rounded px-2 py-1"
-                rows={3}
-                value={section.textContent || ''}
-                onChange={(e) => handleSectionChange(idx, 'textContent', e.target.value)}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      <StorySummaryEditor
+        value={form.summarySections}
+        onChange={(sections) => setForm((prev) => ({ ...prev, summarySections: sections }))}
+      />
 
       {error && <p className="text-sm text-red-500">{error}</p>}
       <button

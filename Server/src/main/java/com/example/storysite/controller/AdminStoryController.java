@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.storysite.dto.story.StoryRequest;
 import com.example.storysite.dto.story.StoryResponse;
+import com.example.storysite.dto.story.StorySummarySectionDto;
 import com.example.storysite.service.StoryService;
 
 import jakarta.validation.Valid;

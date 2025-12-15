@@ -25,6 +25,9 @@ const AdminLayout = () => {
             <Link className={location.pathname.startsWith('/admin/categories') ? 'text-emerald-400' : ''} to="/admin/categories">
               Categories
             </Link>
+            <Link className={location.pathname.startsWith('/admin/donations') ? 'text-emerald-400' : ''} to="/admin/donations">
+              Donations
+            </Link>
           </nav>
         </div>
         <div className="text-sm text-slate-300">{user?.username}</div>

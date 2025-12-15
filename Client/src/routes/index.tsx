@@ -13,6 +13,8 @@ import StoryManagementPage from '../pages/Admin/StoryManagementPage'
 import StoryCreatePage from '../pages/Admin/StoryCreatePage'
 import StoryEditPage from '../pages/Admin/StoryEditPage'
 import CategoryManagementPage from '../pages/Admin/CategoryManagementPage'
+import DonatePage from '../pages/Donate/DonatePage'
+import DonationManagementPage from '../pages/Admin/DonationManagementPage'
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
@@ -46,6 +48,7 @@ const AppRoutes = () => (
     <Route element={<MainLayout />}>
       <Route path="/" element={<HomePage />} />
       <Route path="/stories/:slug" element={<StoryDetailPage />} />
+      <Route path="/donate" element={<DonatePage />} />
     </Route>
 
     <Route path={apiConfig.adminLoginPagePath} element={<LoginPage />} />
@@ -58,6 +61,7 @@ const AppRoutes = () => (
         <Route path="/admin/stories/create" element={<StoryCreatePage />} />
         <Route path="/admin/stories/:id/edit" element={<StoryEditPage />} />
         <Route path="/admin/categories" element={<CategoryManagementPage />} />
+        <Route path="/admin/donations" element={<DonationManagementPage />} />
       </Route>
     </Route>
 

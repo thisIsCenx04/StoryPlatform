@@ -15,6 +15,7 @@ import StoryEditPage from '../pages/Admin/StoryEditPage'
 import CategoryManagementPage from '../pages/Admin/CategoryManagementPage'
 import DonatePage from '../pages/Donate/DonatePage'
 import DonationManagementPage from '../pages/Admin/DonationManagementPage'
+import SettingsPage from '../pages/Admin/SettingsPage'
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
@@ -62,6 +63,7 @@ const AppRoutes = () => (
         <Route path="/admin/stories/:id/edit" element={<StoryEditPage />} />
         <Route path="/admin/categories" element={<CategoryManagementPage />} />
         <Route path="/admin/donations" element={<DonationManagementPage />} />
+        <Route path="/admin/settings" element={<SettingsPage />} />
       </Route>
     </Route>
 

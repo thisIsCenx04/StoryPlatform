@@ -157,4 +157,30 @@ public class StoryService {
         response.setSummarySections(sections);
         return response;
     }
+
+    public List<StorySummarySectionDto> getSummary(UUID storyId) {
+        Story story = storyRepository.findById(storyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Story not found"));
+        return summarySectionRepository.findByStoryIdOrderBySortOrderAsc(story.getId())
+                .stream()
+                .map(storyMapper::toDto)
+                .toList();
+    }
+
+    @Transactional
+    public List<StorySummarySectionDto> updateSummary(UUID storyId, List<StorySummarySectionDto> sections) {
+        Story story = storyRepository.findById(storyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Story not found"));
+        summarySectionRepository.deleteByStoryId(story.getId());
+        if (sections != null) {
+            List<StorySummarySection> entities = sections.stream()
+                    .map(dto -> {
+                        StorySummarySection section = storyMapper.toEntity(dto);
+                        section.setStory(story);
+                        return section;
+                    }).toList();
+            summarySectionRepository.saveAll(entities);
+        }
+        return getSummary(storyId);
+    }
 }

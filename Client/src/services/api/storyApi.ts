@@ -1,5 +1,5 @@
 import { buildApiUrl } from '../../config/apiConfig'
-import type { Story, StoryRequestPayload, Category } from '../../types/story'
+import type { Story, StoryRequestPayload, Category, StorySummarySection } from '../../types/story'
 import { authStore } from '../../store/authStore'
 
 const authHeaders = (): Record<string, string> => {
@@ -55,6 +55,22 @@ export const storyApi = {
       headers: authHeaders(),
     })
     if (!res.ok) throw new Error('Xóa truyện thất bại')
+  },
+
+  async getSummary(id: string) {
+    const res = await fetch(buildApiUrl(`/api/admin/stories/${id}/summary`), { headers: authHeaders() })
+    if (!res.ok) throw new Error('Không tải được tóm tắt')
+    return (await res.json()) as StorySummarySection[]
+  },
+
+  async updateSummary(id: string, sections: StorySummarySection[]) {
+    const res = await fetch(buildApiUrl(`/api/admin/stories/${id}/summary`), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(sections),
+    })
+    if (!res.ok) throw new Error('Cập nhật tóm tắt thất bại')
+    return (await res.json()) as StorySummarySection[]
   },
 }
 

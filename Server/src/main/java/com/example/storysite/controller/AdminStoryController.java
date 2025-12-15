@@ -51,4 +51,15 @@ public class AdminStoryController {
         storyService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<List<StorySummarySectionDto>> getSummary(@PathVariable UUID id) {
+        return ResponseEntity.ok(storyService.getSummary(id));
+    }
+
+    @PutMapping("/{id}/summary")
+    public ResponseEntity<List<StorySummarySectionDto>> updateSummary(@PathVariable UUID id,
+            @RequestBody List<StorySummarySectionDto> sections) {
+        return ResponseEntity.ok(storyService.updateSummary(id, sections));
+    }
 }

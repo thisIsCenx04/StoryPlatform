@@ -17,6 +17,8 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,7 +54,8 @@ public class Story {
     private String shortDescription;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "story_status", nullable = false, length = 20)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) // map to PostgreSQL enum story_status
+    @Column(name = "story_status", nullable = false, columnDefinition = "story_status")
     private StoryStatus storyStatus = StoryStatus.ONGOING;
 
     @Column(name = "total_chapters", nullable = false)

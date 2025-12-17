@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 
 import { categoryApi } from '../../../services/api/categoryApi'
 import type { Category } from '../../../types/category'
 import type { Story, StoryRequestPayload, StoryStatus, StorySummarySection } from '../../../types/story'
 import StoryStatusBadge from '../../../components/story/StoryStatusBadge'
 import StorySummaryEditor from '../../../components/story/StorySummaryEditor'
+import CategoryMultiSelect from '../../../components/admin/CategoryMultiSelect'
 
 interface Props {
   initialValue?: Story
@@ -14,20 +15,26 @@ interface Props {
 const defaultSection = (): StorySummarySection => ({ sortOrder: 1, textContent: '', imageUrl: '' })
 
 const StoryForm = ({ initialValue, onSubmit }: Props) => {
-  const [form, setForm] = useState<StoryRequestPayload>(() =>
+  const [form, setForm] = useState<StoryRequestPayload & { summarySections: StorySummarySection[] }>(() =>
     initialValue
       ? {
           slug: initialValue.slug,
           title: initialValue.title,
-          coverImageUrl: initialValue.coverImageUrl,
-          authorName: initialValue.authorName,
-          shortDescription: initialValue.shortDescription,
+          coverImageUrl: initialValue.coverImageUrl || '',
+          authorName: initialValue.authorName || '',
+          shortDescription: initialValue.shortDescription || '',
           storyStatus: initialValue.storyStatus,
-          totalChapters: initialValue.totalChapters,
+          totalChapters: initialValue.totalChapters ?? 0,
           hot: initialValue.hot,
           recommended: initialValue.recommended,
-          categoryIds: initialValue.categoryIds,
-          summarySections: initialValue.summarySections.length ? initialValue.summarySections : [defaultSection()],
+          categoryIds: initialValue.categoryIds ?? [],
+          summarySections:
+            initialValue.summarySections && initialValue.summarySections.length > 0
+              ? initialValue.summarySections.map((s, idx) => ({
+                  ...s,
+                  tempId: s.id ?? `init-${idx + 1}`,
+                }))
+              : [defaultSection()],
         }
       : {
           slug: '',
@@ -47,8 +54,12 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
+  const fieldClass = 'w-full border border-slate-300 rounded px-3 py-2 bg-white text-slate-900'
+  const toggleClass = (active: boolean) =>
+    `px-4 py-2 rounded-full text-sm font-semibold border ${active ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-300'}`
+
   useEffect(() => {
-    categoryApi.list().then(setCategories).catch(() => setCategories([]))
+    categoryApi.listAdmin().then(setCategories).catch(() => setCategories([]))
   }, [])
 
   const handleChange = (field: keyof StoryRequestPayload, value: any) => {
@@ -60,7 +71,16 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
     setSaving(true)
     setError(null)
     try {
-      await onSubmit(form)
+      // normalize summary sections: drop tempId, drop non-UUID id, resequence sortOrder
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const cleanedSections = (form.summarySections || []).map((s, idx) => ({
+        id: s.id && uuidRegex.test(s.id) ? s.id : undefined, // will be ignored by backend (new ids)
+        sortOrder: idx + 1,
+        textContent: s.textContent || '',
+        imageUrl: s.imageUrl || '',
+      }))
+      const payload: StoryRequestPayload = { ...form, summarySections: cleanedSections }
+      await onSubmit(payload)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lưu thất bại')
     } finally {
@@ -68,70 +88,42 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
     }
   }
 
-  const toggleCategory = (id: string) => {
-    setForm((prev) => {
-      const exists = prev.categoryIds.includes(id)
-      return {
-        ...prev,
-        categoryIds: exists ? prev.categoryIds.filter((c) => c !== id) : [...prev.categoryIds, id],
-      }
-    })
-  }
-
   return (
     <form className="space-y-4" onSubmit={submit}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm mb-1">Slug</label>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={form.slug}
-            onChange={(e) => handleChange('slug', e.target.value)}
-            required
-          />
+          <label className="block text-sm mb-1 text-slate-700">Slug</label>
+          <input className={fieldClass} value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} />
         </div>
         <div>
-          <label className="block text-sm mb-1">Tiêu đề</label>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={form.title}
-            onChange={(e) => handleChange('title', e.target.value)}
-            required
-          />
+          <label className="block text-sm mb-1 text-slate-700">Tiêu đề</label>
+          <input className={fieldClass} value={form.title} onChange={(e) => handleChange('title', e.target.value)} required />
         </div>
         <div>
-          <label className="block text-sm mb-1">Ảnh bìa</label>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={form.coverImageUrl}
-            onChange={(e) => handleChange('coverImageUrl', e.target.value)}
-          />
+          <label className="block text-sm mb-1 text-slate-700">Ảnh bìa</label>
+          <input className={fieldClass} value={form.coverImageUrl} onChange={(e) => handleChange('coverImageUrl', e.target.value)} />
         </div>
         <div>
-          <label className="block text-sm mb-1">Tác giả</label>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={form.authorName}
-            onChange={(e) => handleChange('authorName', e.target.value)}
-          />
+          <label className="block text-sm mb-1 text-slate-700">Tác giả</label>
+          <input className={fieldClass} value={form.authorName} onChange={(e) => handleChange('authorName', e.target.value)} />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm mb-1">Mô tả ngắn</label>
+        <label className="block text-sm mb-1 text-slate-700">Mô tả ngắn</label>
         <textarea
-          className="w-full border rounded px-3 py-2"
+          className={fieldClass}
           rows={3}
           value={form.shortDescription}
           onChange={(e) => handleChange('shortDescription', e.target.value)}
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
         <div>
-          <label className="block text-sm mb-1">Trạng thái</label>
+          <label className="block text-sm mb-1 text-slate-700">Trạng thái</label>
           <select
-            className="w-full border rounded px-3 py-2"
+            className={fieldClass}
             value={form.storyStatus}
             onChange={(e) => handleChange('storyStatus', e.target.value as StoryStatus)}
           >
@@ -145,39 +137,35 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
           </div>
         </div>
         <div>
-          <label className="block text-sm mb-1">Tổng số chap</label>
+          <label className="block text-sm mb-1 text-slate-700">Tổng số chap</label>
           <input
             type="number"
-            className="w-full border rounded px-3 py-2"
+            className={fieldClass}
             value={form.totalChapters}
             onChange={(e) => handleChange('totalChapters', Number(e.target.value))}
           />
         </div>
-        <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2">
-            <input type="checkbox" checked={form.hot} onChange={(e) => handleChange('hot', e.target.checked)} /> Hot
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={form.recommended}
-              onChange={(e) => handleChange('recommended', e.target.checked)}
-            />{' '}
-            Đề cử
-          </label>
+        <div className="flex items-center gap-3 mt-4 md:mt-7">
+          <button type="button" className={toggleClass(form.hot)} onClick={() => handleChange('hot', !form.hot)}>
+            {form.hot ? 'Hot: Bật' : 'Hot: Tắt'}
+          </button>
+          <button
+            type="button"
+            className={toggleClass(form.recommended)}
+            onClick={() => handleChange('recommended', !form.recommended)}
+          >
+            {form.recommended ? 'Đề cử: Bật' : 'Đề cử: Tắt'}
+          </button>
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold mb-2">Thể loại</h3>
-        <div className="flex flex-wrap gap-3">
-          {categories.map((cat) => (
-            <label key={cat.id} className="flex items-center gap-2">
-              <input type="checkbox" checked={form.categoryIds.includes(cat.id)} onChange={() => toggleCategory(cat.id)} />
-              {cat.name}
-            </label>
-          ))}
-        </div>
+        <h3 className="text-sm font-semibold mb-2 text-slate-800">Thể loại</h3>
+        <CategoryMultiSelect
+          categories={categories}
+          selectedIds={form.categoryIds}
+          onChange={(ids) => setForm((prev) => ({ ...prev, categoryIds: ids }))}
+        />
       </div>
 
       <StorySummaryEditor

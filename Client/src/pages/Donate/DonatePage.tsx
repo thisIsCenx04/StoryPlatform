@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 
 import DonateFail from '../../components/donate/DonateFail'
 import DonateForm from '../../components/donate/DonateForm'
@@ -23,14 +23,18 @@ const DonatePage = () => {
   }
 
   return (
-    <section className="max-w-xl mx-auto space-y-4">
-      <h1 className="text-2xl font-semibold text-slate-900">Ủng hộ website</h1>
-      <p className="text-slate-600 text-sm">Mọi đóng góp giúp duy trì server và phát triển tính năng mới.</p>
+    <section className="max-w-2xl mx-auto space-y-4">
+      <h1 className="text-3xl font-semibold" style={{ color: 'var(--text)' }}>
+        Ủng hộ website
+      </h1>
+      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+        Mọi đóng góp giúp duy trì server và phát triển tính năng mới.
+      </p>
 
       {status === 'success' && <DonateSuccess />}
       {status === 'fail' && <DonateFail message={error ?? undefined} />}
 
-      <div className="bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+      <div className="card rounded-xl p-6 shadow-sm">
         <DonateForm onSubmit={handleSubmit} />
       </div>
     </section>

@@ -1,19 +1,28 @@
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
-import type { ReactNode } from 'react'
+import type { ReactNode, CSSProperties, HTMLAttributes } from 'react'
 
-export const SortableItem = ({ id, children }: { id: string | number; children: ReactNode }) => {
+type RenderProps = {
+  setNodeRef: (node: HTMLElement | null) => void
+  style: CSSProperties
+  handleProps: HTMLAttributes<HTMLElement>
+  isDragging: boolean
+}
+
+export const SortableItem = ({
+  id,
+  children,
+}: {
+  id: string | number
+  children: (props: RenderProps) => ReactNode
+}) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
-  const style = {
+  const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.6 : 1,
   }
 
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      {children}
-    </div>
-  )
+  return <>{children({ setNodeRef, style, handleProps: { ...attributes, ...listeners }, isDragging })}</>
 }

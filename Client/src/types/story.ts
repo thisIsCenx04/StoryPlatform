@@ -2,6 +2,7 @@ export type StoryStatus = 'ONGOING' | 'COMPLETED' | 'PAUSED' | 'DROPPED'
 
 export interface StorySummarySection {
   id?: string
+  tempId?: string
   sortOrder: number
   textContent?: string
   imageUrl?: string

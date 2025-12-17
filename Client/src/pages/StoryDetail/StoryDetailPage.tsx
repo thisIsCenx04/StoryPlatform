@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 import StoryStatusBadge from '../../components/story/StoryStatusBadge'
@@ -37,10 +37,10 @@ const StoryDetailPage = () => {
   }, [slug])
 
   if (error) return <p className="text-red-600">{error}</p>
-  if (!story) return <p>Đang tải...</p>
+  if (!story) return <p className="muted">Đang tải...</p>
 
   return (
-    <article className="space-y-4">
+    <article className="space-y-4" style={{ color: 'var(--text)' }}>
       {articleSeo && <ArticleJsonLd article={articleSeo} />}
       {breadcrumb && <BreadcrumbJsonLd breadcrumb={breadcrumb} />}
       <div className="flex flex-col md:flex-row gap-4">
@@ -48,24 +48,35 @@ const StoryDetailPage = () => {
           <img
             src={story.coverImageUrl}
             alt={story.title}
-            className="w-full md:w-64 rounded-lg border border-slate-200 object-cover"
+            className="w-full md:w-64 rounded-lg object-cover"
+            style={{ border: '1px solid var(--border)' }}
           />
         )}
         <div className="space-y-3 flex-1">
-          <h1 className="text-3xl font-semibold text-slate-900">{story.title}</h1>
+          <h1 className="text-3xl font-semibold" style={{ color: 'var(--text)' }}>
+            {story.title}
+          </h1>
           <div className="flex items-center gap-2">
             <StoryStatusBadge status={story.storyStatus} />
-            {story.hot && <span className="text-xs px-2 py-1 rounded bg-rose-100 text-rose-700">Hot</span>}
-            {story.recommended && <span className="text-xs px-2 py-1 rounded bg-indigo-100 text-indigo-700">Đề cử</span>}
+            {story.hot && <span className="text-xs px-2 py-1 rounded bg-red-500 text-white">Hot</span>}
+            {story.recommended && <span className="text-xs px-2 py-1 rounded bg-cyan-500 text-white">Đề cử</span>}
           </div>
-          <p className="text-slate-600">{story.shortDescription}</p>
-          <div className="text-sm text-slate-500">Tác giả: {story.authorName || 'N/A'}</div>
-          <div className="text-sm text-slate-500">Số chap: {story.totalChapters}</div>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            {story.shortDescription}
+          </p>
+          <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            Tác giả: {story.authorName || 'N/A'}
+          </div>
+          <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+            Số chap: {story.totalChapters}
+          </div>
         </div>
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">Tóm tắt</h2>
+        <h2 className="text-xl font-semibold mb-2" style={{ color: 'var(--text)' }}>
+          Tóm tắt
+        </h2>
         <StorySummaryView sections={story.summarySections} />
       </div>
     </article>

@@ -14,6 +14,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,7 +54,8 @@ public class Donation {
     private String paymentTxnId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM) // map to PostgreSQL enum donation_status
+    @Column(nullable = false, columnDefinition = "donation_status")
     private DonationStatus status = DonationStatus.PENDING;
 
     @Column(name = "created_at", nullable = false)

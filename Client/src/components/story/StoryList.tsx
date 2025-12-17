@@ -1,4 +1,4 @@
-import type { Story } from '../../types/story'
+﻿import type { Story } from '../../types/story'
 import StoryCard from './StoryCard'
 
 interface Props {
@@ -7,7 +7,7 @@ interface Props {
 
 const StoryList = ({ stories }: Props) => {
   if (!stories.length) {
-    return <p className="text-sm text-slate-500">Không có truyện.</p>
+    return <p className="text-sm muted">Không có truyện.</p>
   }
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

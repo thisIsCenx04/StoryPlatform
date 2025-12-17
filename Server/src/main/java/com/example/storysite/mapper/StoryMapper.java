@@ -37,6 +37,10 @@ public interface StoryMapper {
     @Mapping(target = "summarySections", source = "summarySections")
     StoryResponse toResponse(Story story);
 
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "story", ignore = true)
+    @Mapping(target = "id", ignore = true)
     StorySummarySection toEntity(StorySummarySectionDto dto);
 
     StorySummarySectionDto toDto(StorySummarySection entity);

@@ -13,6 +13,8 @@ public interface CategoryMapper {
     CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "slug", ignore = true)
+    @Mapping(target = "description", ignore = true)
     @Mapping(target = "parent", ignore = true)
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

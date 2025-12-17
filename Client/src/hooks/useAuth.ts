@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { authApi, type LoginPayload } from '../services/api/authApi'
 import { authStore } from '../store/authStore'
@@ -8,6 +9,7 @@ export const useAuth = () => {
   const [user, setUser] = useState<AuthUser | null>(() => authStore.getUser())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     return authStore.subscribe(setUser)
@@ -28,7 +30,10 @@ export const useAuth = () => {
     }
   }
 
-  const logout = () => authStore.clear()
+  const logout = () => {
+    authStore.clear()
+    navigate('/', { replace: true })
+  }
 
   return { user, loading, error, login, logout, isAuthenticated: !!user }
 }

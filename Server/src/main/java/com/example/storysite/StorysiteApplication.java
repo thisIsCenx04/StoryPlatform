@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -12,6 +13,7 @@ import com.example.storysite.entity.UserRole;
 import com.example.storysite.repository.UserRepository;
 
 @SpringBootApplication
+@EnableJpaRepositories("com.example.storysite.repository")
 public class StorysiteApplication {
 
 	@Value("${app.security.bootstrap-admin.username:admin}")

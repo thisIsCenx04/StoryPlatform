@@ -16,6 +16,7 @@ import CategoryManagementPage from '../pages/Admin/CategoryManagementPage'
 import DonatePage from '../pages/Donate/DonatePage'
 import DonationManagementPage from '../pages/Admin/DonationManagementPage'
 import SettingsPage from '../pages/Admin/SettingsPage'
+import StoryListPage from '../pages/StoryList/StoryListPage'
 
 const AdminDashboardPage = () => {
   const { user } = useAuth()
@@ -48,6 +49,7 @@ const AppRoutes = () => (
   <Routes>
     <Route element={<MainLayout />}>
       <Route path="/" element={<HomePage />} />
+      <Route path="/stories" element={<StoryListPage />} />
       <Route path="/stories/:slug" element={<StoryDetailPage />} />
       <Route path="/donate" element={<DonatePage />} />
     </Route>

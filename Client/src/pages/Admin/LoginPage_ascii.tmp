@@ -1,5 +1,7 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { apiConfig } from '../../config/apiConfig'
+
 const LoginPage = () => {
   const { login, loading, error } = useAuth()
   const navigate = useNavigate()
@@ -41,7 +43,7 @@ const LoginPage = () => {
             className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 disabled:opacity-50"
             disabled={loading}
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {loading ? '?ang ??ng nh?p...' : '??ng nh?p'}
           </button>
         </form>
       </div>

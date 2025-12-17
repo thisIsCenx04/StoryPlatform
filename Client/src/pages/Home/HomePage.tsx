@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 
 import StoryFilterBar from '../../components/story/StoryFilterBar'
 import StoryList from '../../components/story/StoryList'
@@ -41,7 +41,9 @@ const HomePage = () => {
     <section className="space-y-4">
       <BreadcrumbJsonLd breadcrumb={breadcrumb} />
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">Truyện mới</h1>
+        <h1 className="text-2xl font-semibold" style={{ color: 'var(--text)' }}>
+          Truyện mới
+        </h1>
       </div>
 
       <StoryFilterBar onFilter={fetchStories} />

@@ -2,6 +2,8 @@ package com.example.storysite.service;
 
 import java.util.List;
 import java.util.UUID;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,15 +41,8 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponse create(CategoryRequest request) {
-        if (categoryRepository.existsBySlug(request.getSlug())) {
-            throw new BadRequestException("Slug đã tồn tại");
-        }
         Category category = categoryMapper.toEntity(request);
-        if (request.getParentId() != null) {
-            Category parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
-            category.setParent(parent);
-        }
+        category.setSlug(generateUniqueSlug(request.getName()));
         Category saved = categoryRepository.save(category);
         return categoryMapper.toResponse(saved);
     }
@@ -56,19 +51,8 @@ public class CategoryService {
     public CategoryResponse update(UUID id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        if (!category.getSlug().equals(request.getSlug()) && categoryRepository.existsBySlug(request.getSlug())) {
-            throw new BadRequestException("Slug đã tồn tại");
-        }
         category.setName(request.getName());
-        category.setSlug(request.getSlug());
-        category.setDescription(request.getDescription());
-        if (request.getParentId() != null) {
-            Category parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
-            category.setParent(parent);
-        } else {
-            category.setParent(null);
-        }
+        category.setSlug(generateUniqueSlug(request.getName(), category.getId()));
         return categoryMapper.toResponse(categoryRepository.save(category));
     }
 
@@ -78,5 +62,37 @@ public class CategoryService {
             throw new ResourceNotFoundException("Category not found");
         }
         categoryRepository.deleteById(id);
+    }
+
+    private String generateUniqueSlug(String name) {
+        return generateUniqueSlug(name, null);
+    }
+
+    private String generateUniqueSlug(String name, UUID currentId) {
+        String base = toSlug(name);
+        String slug = base;
+        int counter = 1;
+        while (true) {
+            boolean exists = categoryRepository.existsBySlug(slug) &&
+                    (currentId == null || categoryRepository.findBySlug(slug).map(c -> !c.getId().equals(currentId)).orElse(false));
+            if (!exists) {
+                return slug;
+            }
+            slug = base + "-" + counter;
+            counter++;
+        }
+    }
+
+    private String toSlug(String input) {
+        if (input == null) {
+            return "";
+        }
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        String withoutDiacritics = Pattern.compile("\\p{M}+").matcher(normalized).replaceAll("");
+        String slug = withoutDiacritics.trim().toLowerCase()
+                .replaceAll("\\s+", "-")
+                .replaceAll("-{2,}", "-")
+                .replaceAll("^-+|-+$", "");
+        return slug.isBlank() ? "category" : slug;
     }
 }

@@ -1,18 +1,20 @@
+﻿import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import Header from './Header'
 import Footer from './Footer'
 import Breadcrumb from './Breadcrumb'
 import { useCopyProtection } from '../hooks/useCopyProtection'
-import { useEffect, useState } from 'react'
 import { settingsApi } from '../services/api/settingsApi'
 import { seoApi } from '../services/api/seoApi'
 import type { SeoOrganization } from '../types/seo'
 import OrganizationJsonLd from '../components/seo/OrganizationJsonLd'
+import { useTheme } from '../hooks/useTheme'
 
 const MainLayout = () => {
   const [copyProtection, setCopyProtection] = useState(true)
   const [organization, setOrganization] = useState<SeoOrganization | null>(null)
+  const { theme } = useTheme()
   useCopyProtection(copyProtection)
 
   useEffect(() => {
@@ -30,7 +32,7 @@ const MainLayout = () => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen flex flex-col" data-theme={theme}>
       {organization && <OrganizationJsonLd organization={organization} />}
       <Header />
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">

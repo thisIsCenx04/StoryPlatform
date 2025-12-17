@@ -9,10 +9,20 @@ const StoryEditPage = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [story, setStory] = useState<Story | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
-    storyApi.adminList().then((list) => setStory(list.find((s) => s.id === id) ?? null))
+    storyApi
+      .adminGet(id)
+      .then((data) =>
+        setStory({
+          ...data,
+          summarySections: data.summarySections ?? [],
+          categoryIds: data.categoryIds ?? [],
+        })
+      )
+      .catch((err) => setError(err instanceof Error ? err.message : 'Không t?i du?c truy?n'))
   }, [id])
 
   const handleSubmit = async (payload: StoryRequestPayload) => {
@@ -21,7 +31,8 @@ const StoryEditPage = () => {
     navigate('/admin/stories')
   }
 
-  if (!story) return <p>Äang táº£i...</p>
+  if (error) return <p className="text-red-500">{error}</p>
+  if (!story) return <p className="text-white">Ğang t?i...</p>
   return <StoryForm initialValue={story} onSubmit={handleSubmit} />
 }
 

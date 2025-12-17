@@ -43,7 +43,13 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(adminLoginPath, "/actuator/health", "/health").permitAll()
-                        .requestMatchers(GET, "/api/public/**", "/api/story/**", "/api/category/**").permitAll()
+                        .requestMatchers(GET,
+                                "/api/stories/**",
+                                "/api/categories/**",
+                                "/api/seo/**",
+                                "/api/settings/public",
+                                "/api/public/**")
+                        .permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

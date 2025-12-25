@@ -7,8 +7,6 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,8 +15,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,14 +48,6 @@ public class Story {
 
     @Column(name = "short_description", columnDefinition = "text")
     private String shortDescription;
-
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM) // map to PostgreSQL enum story_status
-    @Column(name = "story_status", nullable = false, columnDefinition = "story_status")
-    private StoryStatus storyStatus = StoryStatus.ONGOING;
-
-    @Column(name = "total_chapters", nullable = false)
-    private Integer totalChapters = 0;
 
     @Column(name = "is_hot", nullable = false)
     private boolean hot = false;

@@ -1,15 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import StoryFilterBar from '../../components/story/StoryFilterBar'
 import StoryList from '../../components/story/StoryList'
+import StoryCardCompact from '../../components/story/StoryCardCompact'
 import { storyApi } from '../../services/api/storyApi'
+import { categoryApi } from '../../services/api/categoryApi'
 import type { Story } from '../../types/story'
+import type { Category } from '../../types/category'
 import BreadcrumbJsonLd from '../../components/seo/BreadcrumbJsonLd'
 import { createSimpleBreadcrumb } from '../../utils/seoHelpers'
 
 const HomePage = () => {
   const [stories, setStories] = useState<Story[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,7 +28,7 @@ const HomePage = () => {
       }
       setStories(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i d63 li63u')
+      setError(err instanceof Error ? err.message : 'Không thể tải dữ liệu')
     } finally {
       setLoading(false)
     }
@@ -32,6 +36,13 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchStories()
+  }, [])
+
+  useEffect(() => {
+    categoryApi
+      .list()
+      .then(setCategories)
+      .catch(() => setCategories([]))
   }, [])
 
   const hotStories = useMemo(() => stories.filter((s) => s.hot).slice(0, 6), [stories])
@@ -69,7 +80,7 @@ const HomePage = () => {
   )
 
   const breadcrumb = createSimpleBreadcrumb([
-    { name: 'Trang ch65', url: typeof window !== 'undefined' ? window.location.href : '/' },
+    { name: 'Trang chủ', url: typeof window !== 'undefined' ? window.location.href : '/' },
   ])
 
   return (
@@ -78,7 +89,8 @@ const HomePage = () => {
 
       <div className="relative">
         <div
-          className="home-hero relative overflow-hidden rounded-3xl p-8 md:p-12"
+          key={bannerStory?.id || 'hero'}
+          className="home-hero relative overflow-hidden rounded-3xl p-8 md:p-12 banner-fade"
           style={{
             backgroundImage: bannerStory?.coverImageUrl
               ? `linear-gradient(120deg, rgba(15, 28, 46, 0.15), rgba(15, 28, 46, 0.65)), url(${bannerStory.coverImageUrl})`
@@ -90,33 +102,31 @@ const HomePage = () => {
           <div className="absolute inset-0 home-gridline opacity-40 pointer-events-none" />
           <div className="relative flex items-end min-h-[210px] md:min-h-[280px]">
             {bannerStory && (
-              <div className="home-glass rounded-2xl p-5 max-w-xl">
-                <div className="flex flex-wrap items-center gap-2 text-xs">
+              <div className="home-glass rounded-2xl p-5 max-w-xl fade-in-up" key={bannerStory.id}>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/90">
                   {bannerStory.recommended && (
-                    <span className="px-2 py-0.5 rounded bg-blue-600 text-white">0367 c61</span>
+                    <span className="px-3 py-1 rounded-full bg-blue-600/90 text-white shadow-sm">Đề cử</span>
                   )}
-                  {bannerStory.hot && <span className="px-2 py-0.5 rounded bg-sky-500 text-white">Hot</span>}
-                  <span
-                    className="px-2 py-0.5 rounded border"
-                    style={{
-                      background: 'rgba(59, 130, 246, 0.15)',
-                      borderColor: 'rgba(59, 130, 246, 0.4)',
-                      color: 'var(--text)',
-                    }}
-                  >
-                    {bannerStory.storyStatus}
-                  </span>
+                  {bannerStory.hot && <span className="px-3 py-1 rounded-full bg-rose-500/90 text-white shadow-sm">Hot</span>}
                 </div>
-                <div className="text-2xl md:text-3xl font-semibold mt-3">{bannerStory.title}</div>
-                <div className="text-xs muted mt-2">
-                  Tc gi57: {bannerStory.authorName || 'N/A'}  {bannerStory.totalChapters} ch0601ng
+                <div className="text-2xl md:text-3xl font-semibold mt-3 text-white drop-shadow-sm">
+                  {bannerStory.title}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-sm text-white/85 mt-2">
+                  <span>Tác giả: {bannerStory.authorName || 'N/A'}</span>
                 </div>
                 <div className="mt-4">
                   <Link
                     to={`/stories/${bannerStory.slug}/read`}
-                    className="px-4 py-2 rounded-full font-semibold accent-btn shadow-sm"
+                    className="px-4 py-2 rounded-full font-semibold shadow-sm"
+                    style={{
+                      background: '#fff',
+                      color: '#2563eb',
+                      border: '1px solid rgba(255,255,255,0.35)',
+                      boxShadow: '0 10px 30px rgba(15, 28, 46, 0.2)',
+                    }}
                   >
-                    0369c ngay
+                    Đọc ngay
                   </Link>
                 </div>
               </div>
@@ -136,7 +146,7 @@ const HomePage = () => {
                   background: idx === bannerIndex ? 'var(--accent)' : 'rgba(59, 130, 246, 0.25)',
                   border: idx === bannerIndex ? '1px solid rgba(59, 130, 246, 0.6)' : '1px solid transparent',
                 }}
-                aria-label={`Ch69n banner ${idx + 1}`}
+                aria-label={`Chọn banner ${idx + 1}`}
               />
             ))}
           </div>
@@ -147,35 +157,16 @@ const HomePage = () => {
         <div className="space-y-4">
           <div>
             <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
-              Th06 vi63n g61i 05
+              Thư viện gợi ý
             </p>
-            <h2 className="home-title text-2xl lg:text-3xl">L65a ch69n 0469 0469c ngay</h2>
+            <h2 className="home-title text-2xl lg:text-3xl">Lựa chọn đọc ngay</h2>
             <p className="muted mt-2 text-sm">
-              Ch69n nhanh truy63n n67i b67t, v69a c67p nh67t, v 040661c 04nh gi cao.
+              Chọn nhanh truyện nổi bật, vừa cập nhật, và đánh giá cao.
             </p>
           </div>
           <div className="grid gap-3">
             {trendStories.map((story) => (
-              <div key={story.id} className="surface rounded-xl p-4 border">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-12 w-12 rounded-lg"
-                    style={{ background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.28), rgba(147, 197, 253, 0.18))' }}
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold text-sm">{story.title}</div>
-                    <div className="text-xs muted">
-                      {story.authorName || 'N/A'}  {story.storyStatus}  {story.totalChapters} ch0601ng
-                    </div>
-                  </div>
-                  <span
-                    className="text-[11px] px-2 py-1 rounded-full"
-                    style={{ background: 'rgba(59, 130, 246, 0.18)', color: 'var(--text)' }}
-                  >
-                    {story.hot ? 'Hot' : 'M63i'}
-                  </span>
-                </div>
-              </div>
+              <StoryCardCompact key={story.id} story={story} />
             ))}
           </div>
         </div>
@@ -184,33 +175,17 @@ const HomePage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
-                Tuy69n t67p
+                Tuyển tập
               </p>
-              <h3 className="home-title text-2xl">G61i 05 theo th69 lo55i</h3>
+              <h3 className="home-title text-2xl">Gợi ý theo thể loại</h3>
             </div>
             <a href="#discover" className="text-sm hover:underline" style={{ color: 'var(--accent)' }}>
-              Xem t59t c57
+              Xem tất cả
             </a>
           </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {featuredStories.map((story) => (
-              <div
-                key={story.id}
-                className="rounded-xl p-4 border"
-                style={{
-                  background: 'linear-gradient(150deg, rgba(59, 130, 246, 0.12), rgba(239, 246, 255, 0.18))',
-                  borderColor: 'rgba(59, 130, 246, 0.2)',
-                }}
-              >
-                <div className="text-xs uppercase tracking-[0.2em] muted">0367 xu59t</div>
-                <div className="mt-2 font-semibold text-sm">{story.title}</div>
-                <p className="mt-2 text-xs muted line-clamp-3">
-                  {story.shortDescription || 'Tm t69t s63 040661c c67p nh67t s63m.'}
-                </p>
-                <div className="mt-3 text-xs muted">
-                  {story.authorName || 'N/A'}  {story.totalChapters} ch0601ng
-                </div>
-              </div>
+              <StoryCardCompact key={story.id} story={story} />
             ))}
           </div>
         </div>
@@ -219,13 +194,13 @@ const HomePage = () => {
       <div id="discover" className="space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
-            Khm ph
+            Khám phá
           </p>
-          <h2 className="home-title text-2xl lg:text-3xl">Danh sch truy63n m63i nh59t</h2>
+          <h2 className="home-title text-2xl lg:text-3xl">Danh sách truyện mới nhất</h2>
         </div>
         <StoryFilterBar onFilter={fetchStories} />
         {error && <p className="text-sm text-red-600">{error}</p>}
-        {loading ? <p>03ang t57i...</p> : <StoryList stories={stories} />}
+        {loading ? <p>Đang tải...</p> : <StoryList stories={stories} categories={categories} />}
       </div>
     </section>
   )

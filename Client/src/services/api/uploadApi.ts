@@ -20,7 +20,7 @@ export const uploadApi = {
       body: form,
     })
     if (!res.ok) {
-      throw new Error('Upload 57nh th59t b55i')
+      throw new Error('Upload ảnh thất bại')
     }
     return (await res.json()) as UploadResponse
   },
@@ -33,7 +33,7 @@ export const uploadApi = {
       body: form,
     })
     if (!res.ok) {
-      throw new Error('Upload 57nh th59t b55i')
+      throw new Error('Upload ảnh thất bại')
     }
     return (await res.json()) as UploadResponse
   },

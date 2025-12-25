@@ -1,4 +1,4 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -120,7 +120,7 @@ const StorySummaryEditor = ({ value, onChange }: Props) => {
       const response = await uploadApi.uploadImage(file)
       handleFieldChange(id, 'imageUrl', response.url)
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Upload 57nh th59t b55i')
+      setUploadError(err instanceof Error ? err.message : 'Upload ảnh thất bại')
     } finally {
       setUploadingId(null)
     }
@@ -130,11 +130,11 @@ const StorySummaryEditor = ({ value, onChange }: Props) => {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold">Tm t69t (ko th57 0469 s69p x65p)</h3>
-          <p className="text-xs admin-muted mt-1">Dn nhi67u dng s63 t65 tch thnh nhi67u block.</p>
+          <h3 className="text-sm font-semibold">Tóm tắt (không thể sắp xếp)</h3>
+          <p className="text-xs admin-muted mt-1">Dán nhiều dòng sẽ tách thành nhiều block.</p>
         </div>
         <button type="button" className="admin-button admin-button-secondary text-sm" onClick={addBlock}>
-          + Thm block
+          + Thêm block
         </button>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -149,7 +149,7 @@ const StorySummaryEditor = ({ value, onChange }: Props) => {
                       <div className="flex items-center gap-3">
                         <span
                           className="cursor-grab text-xs admin-muted"
-                          title="Ko 0469 s69p x65p"
+                          title="Không thể sắp xếp"
                           {...handleProps}
                         >
                           drag
@@ -161,13 +161,13 @@ const StorySummaryEditor = ({ value, onChange }: Props) => {
                             style={{ color: '#c24158' }}
                             onClick={() => removeBlock(getKey(section))}
                           >
-                            Xa
+                            Xóa
                           </button>
                         )}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs mb-1 admin-muted">N61i dung</label>
+                      <label className="block text-xs mb-1 admin-muted">Nội dung</label>
                       <textarea
                         className="admin-input w-full"
                         rows={3}
@@ -183,7 +183,7 @@ const StorySummaryEditor = ({ value, onChange }: Props) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs mb-1 admin-muted">56nh minh h69a (upload)</label>
+                      <label className="block text-xs mb-1 admin-muted">Hình minh họa (upload)</label>
                       <input
                         type="file"
                         accept="image/*"
@@ -191,16 +191,18 @@ const StorySummaryEditor = ({ value, onChange }: Props) => {
                         onChange={(e) => handleImageUpload(getKey(section), e.target.files?.[0])}
                       />
                       {uploadingId === getKey(section) && (
-                        <div className="text-xs admin-muted mt-2">03ang t57i 57nh...</div>
+                        <div className="text-xs admin-muted mt-2">Đang tải ảnh...</div>
                       )}
                       {section.imageUrl && (
-                        <img
-                          src={section.imageUrl}
-                          alt=""
-                          className="w-full rounded-lg mt-3"
-                          style={{ border: '1px solid var(--border)' }}
-                          loading="lazy"
-                        />
+                        <div className="w-full mt-3">
+                          <img
+                            src={section.imageUrl}
+                            alt=""
+                            className="w-full max-w-3xl rounded-lg object-contain mx-auto"
+                            style={{ border: '1px solid var(--border)', maxHeight: '520px' }}
+                            loading="lazy"
+                          />
+                        </div>
                       )}
                       {uploadError && <div className="text-xs mt-2" style={{ color: '#c24158' }}>{uploadError}</div>}
                     </div>

@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Routes, Route, Navigate, Link } from 'react-router-dom'
+﻿import { useEffect, useMemo, useState } from 'react'
+import { Routes, Route, Navigate } from 'react-router-dom'
 
 import { apiConfig } from '../config/apiConfig'
 import AdminLayout from '../layout/AdminLayout'
 import MainLayout from '../layout/MainLayout'
-import { useAuth } from '../hooks/useAuth'
 import AdminRoute from './AdminRoute'
 import LoginPage from '../pages/Admin/LoginPage'
 import HomePage from '../pages/Home/HomePage'
@@ -18,12 +17,12 @@ import DonatePage from '../pages/Donate/DonatePage'
 import DonationManagementPage from '../pages/Admin/DonationManagementPage'
 import SettingsPage from '../pages/Admin/SettingsPage'
 import StoryListPage from '../pages/StoryList/StoryListPage'
+import CategoryListPage from '../pages/CategoryList/CategoryListPage'
 import { storyApi } from '../services/api/storyApi'
 import { donationApi } from '../services/api/donationApi'
 import { categoryApi } from '../services/api/categoryApi'
 
 const AdminDashboardPage = () => {
-  const { user } = useAuth()
   const [stories, setStories] = useState<ReturnType<typeof storyApi.adminList> extends Promise<infer T> ? T : never>(
     []
   )
@@ -33,13 +32,6 @@ const AdminDashboardPage = () => {
   const [categories, setCategories] = useState<
     ReturnType<typeof categoryApi.listAdmin> extends Promise<infer T> ? T : never
   >([])
-  const [stats, setStats] = useState([
-    { label: 'T67ng truy63n', value: 0 },
-    { label: 'Truy63n hot', value: 0 },
-    { label: '0367 xu59t', value: 0 },
-    { label: 'Th69 lo55i', value: 0 },
-    { label: '64ng h61 ch65 duy63t', value: 0 },
-  ])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastSync, setLastSync] = useState<string | null>(null)
@@ -56,19 +48,9 @@ const AdminDashboardPage = () => {
       setStories(storyList)
       setDonations(donationList)
       setCategories(categoryList)
-      const hotCount = storyList.filter((s) => s.hot).length
-      const recommendedCount = storyList.filter((s) => s.recommended).length
-      const pendingDonations = donationList.filter((d) => d.status === 'PENDING').length
-      setStats([
-        { label: 'T67ng truy63n', value: storyList.length },
-        { label: 'Truy63n hot', value: hotCount },
-        { label: '0367 xu59t', value: recommendedCount },
-        { label: 'Th69 lo55i', value: categoryList.length },
-        { label: '64ng h61 ch65 duy63t', value: pendingDonations },
-      ])
       setLastSync(new Date().toLocaleString('vi-VN'))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kh00ng th69 k65t n63i API')
+      setError(err instanceof Error ? err.message : 'Không thể kết nối API')
     } finally {
       setLoading(false)
     }
@@ -78,10 +60,23 @@ const AdminDashboardPage = () => {
     loadStats()
   }, [])
 
+  const stats = useMemo(() => {
+    const hotCount = stories.filter((s) => s.hot).length
+    const recommendedCount = stories.filter((s) => s.recommended).length
+    const pendingDonations = donations.filter((d) => d.status === 'PENDING').length
+    return [
+      { label: 'Tổng truyện', value: stories.length },
+      { label: 'Truyện hot', value: hotCount },
+      { label: 'Đề xuất', value: recommendedCount },
+      { label: 'Thể loại', value: categories.length },
+      { label: 'Ủng hộ chờ duyệt', value: pendingDonations },
+    ]
+  }, [stories, donations, categories])
+
   const statusLabel = useMemo(() => {
-    if (loading) return '03ang ki69m tra'
-    if (error) return 'M59t k65t n63i'
-    return 'Ho55t 0461ng'
+    if (loading) return 'Đang tải dữ liệu'
+    if (error) return 'Mất kết nối'
+    return 'Hoạt động'
   }, [error, loading])
 
   const donationSummary = useMemo(() => {
@@ -125,6 +120,16 @@ const AdminDashboardPage = () => {
     <div className="space-y-6">
       {error && <div className="admin-card p-4 text-sm" style={{ color: '#ff8b8b' }}>{error}</div>}
 
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="text-sm admin-muted">
+          {statusLabel}
+          {lastSync && <span> · Cập nhật: {lastSync}</span>}
+        </div>
+        <button type="button" className="admin-button admin-button-secondary text-xs" onClick={loadStats}>
+          Làm mới
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
         {stats.map((stat) => (
           <div key={stat.label} className="admin-card p-4">
@@ -137,15 +142,15 @@ const AdminDashboardPage = () => {
       <div className="grid grid-cols-1 xl:grid-cols-[1.4fr_1fr] gap-4">
         <div className="admin-card p-5 space-y-4">
           <div>
-            <h2 className="text-lg font-semibold">Bi69u 0465 truy63n theo l0661t xem</h2>
-            <p className="text-sm admin-muted">Top 6 truy63n 04ang 040661c quan t09m.</p>
+            <h2 className="text-lg font-semibold">Biểu đồ truyện theo lượt xem</h2>
+            <p className="text-sm admin-muted">Top 6 truyện đang được quan tâm.</p>
           </div>
           <div className="space-y-3">
             {topStories.map((story) => (
               <div key={story.id} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
                   <span>{story.title}</span>
-                  <span className="admin-muted">{story.viewCount ?? 0} l0661t xem</span>
+                  <span className="admin-muted">{story.viewCount ?? 0} lượt xem</span>
                 </div>
                 <div className="h-2 rounded-full" style={{ background: '#e6efff' }}>
                   <div
@@ -158,26 +163,26 @@ const AdminDashboardPage = () => {
                 </div>
               </div>
             ))}
-            {!topStories.length && <p className="text-sm admin-muted">Ch06a c d63 li63u truy63n.</p>}
+            {!topStories.length && <p className="text-sm admin-muted">Chưa có dữ liệu truyện.</p>}
           </div>
         </div>
 
         <div className="admin-card p-5 space-y-4">
           <div>
-            <h2 className="text-lg font-semibold">T67ng quan 65ng h61</h2>
-            <p className="text-sm admin-muted">Gi tr67 v top 04ng gp.</p>
+            <h2 className="text-lg font-semibold">Tổng quan ủng hộ</h2>
+            <p className="text-sm admin-muted">Giá trị và top ủng hộ.</p>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="admin-panel p-3">
-              <div className="text-xs admin-muted">T67ng gi tr67</div>
+              <div className="text-xs admin-muted">Tổng giá trị</div>
               <div className="text-lg font-semibold mt-1">{donationSummary.totalAmount.toLocaleString('vi-VN')} VND</div>
             </div>
             <div className="admin-panel p-3">
-              <div className="text-xs admin-muted">0300 xc nh67n</div>
+              <div className="text-xs admin-muted">Đã xác nhận</div>
               <div className="text-lg font-semibold mt-1">{donationSummary.successAmount.toLocaleString('vi-VN')} VND</div>
             </div>
             <div className="admin-panel p-3">
-              <div className="text-xs admin-muted">Ch65 duy63t</div>
+              <div className="text-xs admin-muted">Chờ duyệt</div>
               <div className="text-lg font-semibold mt-1">{donationSummary.pendingAmount.toLocaleString('vi-VN')} VND</div>
             </div>
           </div>
@@ -186,14 +191,14 @@ const AdminDashboardPage = () => {
               <div key={donation.id} className="flex items-center justify-between text-sm">
                 <div>
                   <div className="font-medium">
-                    {index + 1}. {donation.donorName || '62n danh'}
+                    {index + 1}. {donation.donorName || 'Ẩn danh'}
                   </div>
                   <div className="admin-muted text-xs">{donation.status}</div>
                 </div>
                 <div className="font-semibold">{(donation.amount ?? 0).toLocaleString('vi-VN')} VND</div>
               </div>
             ))}
-            {!topDonations.length && <p className="text-sm admin-muted">Ch06a c l0661t 65ng h61.</p>}
+            {!topDonations.length && <p className="text-sm admin-muted">Chưa có lượt ủng hộ.</p>}
           </div>
         </div>
       </div>
@@ -201,29 +206,23 @@ const AdminDashboardPage = () => {
       <div className="grid grid-cols-1 gap-4">
         <div className="admin-card p-5 space-y-4">
           <div>
-            <h2 className="text-lg font-semibold">Th69 lo55i n67i b67t</h2>
-            <p className="text-sm admin-muted">Top 5 th69 lo55i theo s63 l0661ng truy63n.</p>
+            <h2 className="text-lg font-semibold">Thể loại nổi bật</h2>
+            <p className="text-sm admin-muted">Top 5 thể loại theo số lượng truyện.</p>
           </div>
           <div className="space-y-3">
             {topCategories.map((cat) => (
               <div key={cat.id} className="flex items-center justify-between text-sm">
                 <span>{cat.name}</span>
-                <span className="admin-muted">{cat.count} truy63n</span>
+                <span className="admin-muted">{cat.count} truyện</span>
               </div>
             ))}
-            {!topCategories.length && <p className="text-sm admin-muted">Ch06a c d63 li63u th69 lo55i.</p>}
+            {!topCategories.length && <p className="text-sm admin-muted">Chưa có dữ liệu thể loại.</p>}
           </div>
         </div>
       </div>
     </div>
   )
 }
-
-const NavigateButton = ({ to, label }: { to: string; label: string }) => (
-  <Link className="admin-button admin-button-primary" to={to}>
-    {label}
-  </Link>
-)
 
 const AppRoutes = () => (
   <Routes>
@@ -232,10 +231,11 @@ const AppRoutes = () => (
       <Route path="/stories" element={<StoryListPage />} />
       <Route path="/stories/:slug" element={<StoryDetailPage />} />
       <Route path="/stories/:slug/read" element={<StoryReadPage />} />
+      <Route path="/categories" element={<CategoryListPage />} />
       <Route path="/donate" element={<DonatePage />} />
     </Route>
 
-    <Route path={apiConfig.adminLoginPagePath} element={<LoginPage />} />
+    <Route path={apiConfig.adminLoginApiPath} element={<LoginPage />} />
 
     <Route element={<AdminRoute />}>
       <Route element={<AdminLayout />}>

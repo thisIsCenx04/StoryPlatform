@@ -20,7 +20,7 @@ export const authApi = {
       body: JSON.stringify(payload),
     })
     if (!res.ok) {
-      throw new Error('0300ng nh67p th59t b55i')
+      throw new Error('Đăng nhập thất bại')
     }
     const data = (await res.json()) as LoginResponseDto
     return { token: data.token, username: data.username, role: data.role }

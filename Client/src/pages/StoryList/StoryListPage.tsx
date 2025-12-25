@@ -1,41 +1,30 @@
-﻿import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 import { storyApi } from '../../services/api/storyApi'
 import { categoryApi } from '../../services/api/categoryApi'
-import type { Story, StoryStatus } from '../../types/story'
-import type { Category } from '../../types/category'
 import StoryCard from '../../components/story/StoryCard'
-
-type SortKey = 'views'
-
-const statusOptions: { value: StoryStatus; label: string }[] = [
-  { value: 'ONGOING', label: 'Đang ra' },
-  { value: 'COMPLETED', label: 'Hoàn thành' },
-]
-
-const sortOptions: { value: SortKey; label: string }[] = [
-  { value: 'views', label: 'Lượt xem' },
-]
+import type { Story } from '../../types/story'
+import type { Category } from '../../types/category'
 
 const StoryListPage = () => {
+  const location = useLocation()
   const [stories, setStories] = useState<Story[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [keyword, setKeyword] = useState('')
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [selectedStatuses, setSelectedStatuses] = useState<StoryStatus[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState<SortKey>('views')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [bannerIndex, setBannerIndex] = useState(0)
 
   useEffect(() => {
     setLoading(true)
+    setError(null)
     Promise.all([storyApi.list(), categoryApi.list()])
       .then(([storyList, categoryList]) => {
         setStories(storyList)
         setCategories(categoryList)
       })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Không thể tải danh sách truyện'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -45,158 +34,129 @@ const StoryListPage = () => {
     if (q !== keyword) {
       setKeyword(q)
     }
-  }, [location.search, keyword])
+  }, [keyword, location.search])
 
-  const toggleStatus = (status: StoryStatus) => {
-    setSelectedStatuses((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]))
-  }
+  const filteredStories = useMemo(() => {
+    if (!keyword.trim()) return stories
+    const kw = keyword.toLowerCase()
+    return stories.filter((story) => story.title.toLowerCase().includes(kw))
+  }, [keyword, stories])
 
-  const toggleCategory = (id: string) => {
-    setSelectedCategories((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]))
-  }
+  const hotStories = useMemo(() => filteredStories.filter((s) => s.hot).slice(0, 6), [filteredStories])
+  const curatedStories = useMemo(() => filteredStories.filter((s) => s.recommended).slice(0, 6), [filteredStories])
+  const bannerStories = useMemo(
+    () => (curatedStories.length ? curatedStories : hotStories.length ? hotStories : filteredStories.slice(0, 6)),
+    [curatedStories, hotStories, filteredStories]
+  )
+  const bannerStory = bannerStories[bannerIndex]
 
-  const filtered = useMemo(() => {
-    let list = [...stories]
-    if (keyword.trim()) {
-      const kw = keyword.toLowerCase()
-      list = list.filter((s) => s.title.toLowerCase().includes(kw))
-    }
-    if (selectedStatuses.length) {
-      list = list.filter((s) => selectedStatuses.includes(s.storyStatus))
-    }
-    if (selectedCategories.length) {
-      list = list.filter((s) => s.categoryIds?.some((id) => selectedCategories.includes(id)))
-    }
-    switch (sortBy) {
-      case 'views':
-        list.sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
-        break
-      default:
-        break
-    }
-    return list
-  }, [stories, keyword, selectedStatuses, selectedCategories, sortBy])
+  useEffect(() => {
+    if (!bannerStories.length) return
+    setBannerIndex(0)
+    const timer = setInterval(() => {
+      setBannerIndex((idx) => (idx + 1) % bannerStories.length)
+    }, 6000)
+    return () => clearInterval(timer)
+  }, [bannerStories.length])
 
-  const clearSearch = () => {
-    setKeyword('')
-    navigate('/stories')
-  }
+  const sections = useMemo(() => {
+    return categories
+      .map((category) => ({
+        category,
+        stories: filteredStories.filter((story) => story.categoryIds?.includes(category.id)),
+      }))
+      .filter((section) => section.stories.length)
+      .sort((a, b) => a.category.name.localeCompare(b.category.name, 'vi'))
+  }, [categories, filteredStories])
 
   return (
-    <div className="space-y-6" style={{ color: 'var(--text)' }}>
-      <div className="surface rounded-2xl p-6 border">
-        <div className="flex flex-wrap items-center gap-4 justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
-              Danh sách truyện
-            </p>
-            <h1 className="home-title text-3xl">Khám phá kho truyện</h1>
-            <p className="muted text-sm mt-1">L?c theo th? lo?i, tr?ng th?i v? ?? quan t?m.</p>
+    <section className="space-y-10" style={{ color: 'var(--text)' }}>
+      <div className="relative">
+        <div
+          key={bannerStory?.id || 'hero'}
+          className="home-hero relative overflow-hidden rounded-3xl p-8 md:p-12 banner-fade"
+          style={{
+            backgroundImage: bannerStory?.coverImageUrl
+              ? `linear-gradient(120deg, rgba(15, 28, 46, 0.15), rgba(15, 28, 46, 0.65)), url(${bannerStory.coverImageUrl})`
+              : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="absolute inset-0 home-gridline opacity-40 pointer-events-none" />
+          <div className="relative flex items-end min-h-[210px] md:min-h-[280px]">
+            {bannerStory && (
+              <div className="home-glass rounded-2xl p-5 max-w-xl fade-in-up" key={bannerStory.id}>
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/90">
+                  {bannerStory.recommended && (
+                    <span className="px-3 py-1 rounded-full bg-blue-600/90 text-white shadow-sm">Đề cử</span>
+                  )}
+                  {bannerStory.hot && <span className="px-3 py-1 rounded-full bg-rose-500/90 text-white shadow-sm">Hot</span>}
+                </div>
+                <div className="text-2xl md:text-3xl font-semibold mt-3 text-white drop-shadow-sm">
+                  {bannerStory.title}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 text-sm text-white/85 mt-2">
+                  <span>Tác giả: {bannerStory.authorName || 'N/A'}</span>
+                </div>
+              </div>
+            )}
           </div>
-          {keyword && (
-            <div className="flex items-center gap-2">
-              <span
-                className="px-3 py-1 rounded-full text-xs"
-                style={{ background: 'rgba(59, 130, 246, 0.15)', color: 'var(--text)' }}
-              >
-                Kết qu?cho: {keyword}
-              </span>
-              <button className="text-xs hover:underline" style={{ color: 'var(--accent)' }} onClick={clearSearch}>
-                Xóa tìm kiếm
-              </button>
-            </div>
+        </div>
+
+        {bannerStories.length > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-3">
+            {bannerStories.map((story, idx) => (
+              <button
+                key={story.id}
+                type="button"
+                onClick={() => setBannerIndex(idx)}
+                className="h-2 w-6 rounded-full"
+                style={{
+                  background: idx === bannerIndex ? 'var(--accent)' : 'rgba(59, 130, 246, 0.25)',
+                  border: idx === bannerIndex ? '1px solid rgba(59, 130, 246, 0.6)' : '1px solid transparent',
+                }}
+                aria-label={`Chọn banner ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-8">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+            Thư viện truyện
+          </p>
+          <h1 className="home-title text-3xl">Kho truyện theo thể loại</h1>
+          {keyword ? (
+            <p className="muted text-sm mt-1">Kết quả cho: {keyword}</p>
+          ) : (
+            <p className="muted text-sm mt-1">Khám phá trọn bộ truyện theo từng thể loại.</p>
           )}
         </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        {loading && <p className="muted">Đang tải...</p>}
+
+        {!loading && !sections.length && <p className="muted">Chưa có truyện phù hợp.</p>}
+
+        {sections.map((section) => (
+          <section key={section.category.id} className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">{section.category.name}</h2>
+              <span className="text-xs muted">{section.stories.length} truyện</span>
+            </div>
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {section.stories.map((story) => (
+                <StoryCard key={story.id} story={story} categories={categories} />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
-
-      <div className="grid gap-6 lg:grid-cols-[0.32fr_0.68fr]">
-        <aside className="surface rounded-2xl p-5 border space-y-5">
-          <div>
-            <h4 className="text-sm font-semibold mb-2">Trạng thái</h4>
-            <div className="flex flex-wrap gap-2">
-              {statusOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => toggleStatus(opt.value)}
-                  className="px-3 py-1 rounded-full text-xs border"
-                  style={{
-                    borderColor: selectedStatuses.includes(opt.value) ? 'rgba(59, 130, 246, 0.6)' : 'var(--border)',
-                    background: selectedStatuses.includes(opt.value) ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
-                    color: 'var(--text)',
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold mb-2">Th? lo?i</h4>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => toggleCategory(cat.id)}
-                  className="px-3 py-1 rounded-full text-xs border"
-                  style={{
-                    borderColor: selectedCategories.includes(cat.id) ? 'rgba(59, 130, 246, 0.6)' : 'var(--border)',
-                    background: selectedCategories.includes(cat.id) ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
-                    color: 'var(--text)',
-                  }}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-sm font-semibold mb-2">Sắp xếp</h4>
-            <div className="flex flex-wrap gap-2">
-              {sortOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setSortBy(opt.value)}
-                  className="px-3 py-1 rounded-full text-xs border"
-                  style={{
-                    borderColor: sortBy === opt.value ? 'rgba(59, 130, 246, 0.6)' : 'var(--border)',
-                    background: sortBy === opt.value ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
-                    color: 'var(--text)',
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm muted">Hi?n th? {filtered.length} truy?n</p>
-          </div>
-
-          {loading ? (
-            <p className="muted">Đang tải...</p>
-          ) : filtered.length ? (
-            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-              {filtered.map((s) => (
-                <StoryCard key={s.id} story={s} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center muted">Ch?a c? k?t qu? ph? h?p. H?y th? thay ??i b? l?c.</div>
-          )}
-        </section>
-      </div>
-    </div>
+    </section>
   )
 }
 
 export default StoryListPage
-
-

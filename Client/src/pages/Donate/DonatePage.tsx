@@ -17,7 +17,7 @@ const DonatePage = () => {
       await donationApi.create(payload)
       setStatus('success')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'C l69i x57y ra')
+      setError(err instanceof Error ? err.message : 'Có lỗi xảy ra')
       setStatus('fail')
     }
   }
@@ -25,10 +25,10 @@ const DonatePage = () => {
   return (
     <section className="max-w-2xl mx-auto space-y-4">
       <h1 className="text-3xl font-semibold" style={{ color: 'var(--text)' }}>
-        64ng h61 website
+        Ủng hộ website
       </h1>
       <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-        M69i 04ng gp gip duy tr server v pht tri69n tnh n00ng m63i.
+        Mỗi ủng hộ góp giúp duy trì server và phát triển tính năng mới.
       </p>
 
       {status === 'success' && <DonateSuccess />}

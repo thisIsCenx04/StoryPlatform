@@ -14,11 +14,11 @@ const Footer = () => (
             <div className="text-lg font-semibold" style={{ color: 'var(--text)' }}>
               StoryHub
             </div>
-            <div className="text-xs">Kho truy63n 0467 xu59t theo gu 0469c</div>
+            <div className="text-xs">Kho truyện đề xuất theo gu đọc</div>
           </div>
         </div>
         <p className="text-sm max-w-sm">
-          C67p nh67t truy63n hot m69i ngy, c61ng 0465ng 04nh gi minh b55ch v 0467 xu59t theo th69 lo55i.
+          Cập nhật truyện hot mỗi ngày, cộng đồng đánh giá minh bạch và đề xuất theo thể loại.
         </p>
         <div className="flex items-center gap-3 text-sm">
           <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:underline">
@@ -35,28 +35,28 @@ const Footer = () => (
 
       <div className="space-y-3">
         <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-          Th00ng tin n67i b67t
+          Thông tin nổi bật
         </div>
         <ul className="space-y-2 text-sm">
-          <li>Top truy63n 040661c yu thch tu61n ny</li>
-          <li>Chuyn m63c review v 04nh gi c ch69n l69c</li>
-          <li>Danh sch truy63n m63i c67p nh67t</li>
-          <li>G61i 05 theo th69 lo55i v gu 0469c</li>
+          <li>Top truyện được yêu thích tuần này</li>
+          <li>Chuyên mục review và đánh giá có chọn lọc</li>
+          <li>Danh sách truyện mới cập nhật</li>
+          <li>Gợi ý theo thể loại và gu đọc</li>
         </ul>
       </div>
 
       <div className="space-y-3">
         <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-          Lin h63
+          Liên hệ
         </div>
         <div className="text-sm">Email: hello@storyhub.vn</div>
         <div className="text-sm">Hotline: 0901 234 567</div>
-        <div className="text-sm">0367a ch65: 12 Nguy61n Tr00i, H N61i</div>
+        <div className="text-sm">Địa chỉ: 12 Nguyễn Trãi, Hà Nội</div>
       </div>
     </div>
 
     <div className="mt-8 text-xs text-center">
-      08 {new Date().getFullYear()} StoryHub. B57n quy67n n61i dung thu61c v67 tc gi57 v c61ng 0465ng.
+      © {new Date().getFullYear()} StoryHub. Bản quyền nội dung thuộc về tác giả và cộng đồng.
     </div>
   </footer>
 )

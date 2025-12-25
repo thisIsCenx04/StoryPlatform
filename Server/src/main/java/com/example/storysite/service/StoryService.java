@@ -28,6 +28,7 @@ import com.example.storysite.repository.StorySummarySectionRepository;
 
 @Service
 public class StoryService {
+    private static final long HOT_VIEW_THRESHOLD = 1000L;
 
     private final StoryRepository storyRepository;
     private final StorySummarySectionRepository summarySectionRepository;
@@ -48,7 +49,7 @@ public class StoryService {
     public List<StoryResponse> listPublic(Boolean hot, Boolean recommended) {
         List<Story> stories;
         if (Boolean.TRUE.equals(hot)) {
-            stories = storyRepository.findByHotTrue();
+            stories = storyRepository.findByViewCountGreaterThanEqual(HOT_VIEW_THRESHOLD);
         } else if (Boolean.TRUE.equals(recommended)) {
             stories = storyRepository.findByRecommendedTrue();
         } else {
@@ -81,10 +82,24 @@ public class StoryService {
     }
 
     @Transactional
+    public Long trackView(String slug) {
+        int updated = storyRepository.incrementViewCountBySlug(slug);
+        if (updated == 0) {
+            throw new ResourceNotFoundException("Story not found");
+        }
+        Long viewCount = storyRepository.findViewCountBySlug(slug).orElse(0L);
+        if (viewCount >= HOT_VIEW_THRESHOLD) {
+            storyRepository.markHotBySlug(slug);
+        }
+        return viewCount;
+    }
+
+    @Transactional
     public StoryResponse create(StoryRequest request) {
         String slug = generateUniqueSlug(request.getSlug(), request.getTitle(), null);
         Story story = storyMapper.toEntity(request);
         story.setSlug(slug);
+        story.setHot(isHotByViewCount(story));
         if (request.isRecommended()) {
             story.setRecommendedAt(OffsetDateTime.now());
         }
@@ -104,9 +119,7 @@ public class StoryService {
         story.setCoverImageUrl(request.getCoverImageUrl());
         story.setAuthorName(request.getAuthorName());
         story.setShortDescription(request.getShortDescription());
-        story.setStoryStatus(request.getStoryStatus());
-        story.setTotalChapters(request.getTotalChapters());
-        story.setHot(request.isHot());
+        story.setHot(isHotByViewCount(story));
         story.setRecommended(request.isRecommended());
         story.setRecommendedAt(request.isRecommended() ? OffsetDateTime.now() : null);
 
@@ -129,6 +142,7 @@ public class StoryService {
 
     private void handleCategories(Story story, List<UUID> categoryIds) {
         storyCategoryRepository.deleteByStoryId(story.getId());
+        story.getCategories().clear();
         if (categoryIds != null) {
             for (UUID catId : categoryIds) {
                 Category category = categoryRepository.findById(catId)
@@ -138,6 +152,7 @@ public class StoryService {
                 link.setStory(story);
                 link.setCategory(category);
                 storyCategoryRepository.save(link);
+                story.getCategories().add(link);
             }
         }
     }
@@ -153,12 +168,19 @@ public class StoryService {
 
     private StoryResponse toResponseWithSections(Story story) {
         StoryResponse response = storyMapper.toResponse(story);
+        response.setHot(isHotByViewCount(story));
         List<StorySummarySectionDto> sections = summarySectionRepository.findByStoryIdOrderBySortOrderAsc(story.getId())
                 .stream()
                 .map(storyMapper::toDto)
                 .toList();
         response.setSummarySections(sections);
+        response.setCategoryIds(storyCategoryRepository.findCategoryIdsByStoryId(story.getId()));
         return response;
+    }
+
+    private boolean isHotByViewCount(Story story) {
+        Long viewCount = story.getViewCount();
+        return viewCount != null && viewCount >= HOT_VIEW_THRESHOLD;
     }
 
     public List<StorySummarySectionDto> getSummary(UUID storyId) {

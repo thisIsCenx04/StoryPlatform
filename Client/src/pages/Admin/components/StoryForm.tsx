@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { categoryApi } from '../../../services/api/categoryApi'
 import type { Category } from '../../../types/category'
-import type { Story, StoryRequestPayload, StoryStatus, StorySummarySection } from '../../../types/story'
-import StoryStatusBadge from '../../../components/story/StoryStatusBadge'
+import type { Story, StoryRequestPayload, StorySummarySection } from '../../../types/story'
 import StorySummaryEditor from '../../../components/story/StorySummaryEditor'
 import CategoryMultiSelect from '../../../components/admin/CategoryMultiSelect'
 import { uploadApi } from '../../../services/api/uploadApi'
@@ -24,8 +23,6 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
           coverImageUrl: initialValue.coverImageUrl || '',
           authorName: initialValue.authorName || '',
           shortDescription: initialValue.shortDescription || '',
-          storyStatus: initialValue.storyStatus,
-          totalChapters: initialValue.totalChapters ?? 0,
           hot: initialValue.hot,
           recommended: initialValue.recommended,
           categoryIds: initialValue.categoryIds ?? [],
@@ -43,8 +40,6 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
           coverImageUrl: '',
           authorName: '',
           shortDescription: '',
-          storyStatus: 'ONGOING',
-          totalChapters: 0,
           hot: false,
           recommended: false,
           categoryIds: [],
@@ -67,6 +62,8 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  const shortDescriptionLength = form.shortDescription?.length ?? 0
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     setSaving(true)
@@ -83,7 +80,7 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
       const payload: StoryRequestPayload = { ...form, summarySections: cleanedSections }
       await onSubmit(payload)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'L06u th59t b55i')
+      setError(err instanceof Error ? err.message : 'Lưu thất bại')
     } finally {
       setSaving(false)
     }
@@ -97,7 +94,7 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
       const response = await uploadApi.uploadCover(file)
       handleChange('coverImageUrl', response.url)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload 57nh th59t b55i')
+      setError(err instanceof Error ? err.message : 'Upload ảnh thất bại')
     } finally {
       setUploading(false)
     }
@@ -109,12 +106,14 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_0.7fr] gap-6">
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {!initialValue && (
+                <div>
+                  <label className="block text-sm mb-1">Slug</label>
+                  <input className="admin-input w-full" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} />
+                </div>
+              )}
               <div>
-                <label className="block text-sm mb-1">Slug</label>
-                <input className="admin-input w-full" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Tiu 0467</label>
+                <label className="block text-sm mb-1">Tiêu đề</label>
                 <input
                   className="admin-input w-full"
                   value={form.title}
@@ -123,26 +122,17 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
                 />
               </div>
               <div>
-                <label className="block text-sm mb-1">Tc gi57</label>
+                <label className="block text-sm mb-1">Tác giả</label>
                 <input
                   className="admin-input w-full"
                   value={form.authorName}
                   onChange={(e) => handleChange('authorName', e.target.value)}
                 />
               </div>
-              <div>
-                <label className="block text-sm mb-1">56nh ba (URL)</label>
-                <input
-                  className="admin-input w-full"
-                  value={form.coverImageUrl}
-                  onChange={(e) => handleChange('coverImageUrl', e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
             </div>
 
             <div className="admin-panel p-4 space-y-3">
-              <div className="text-sm font-semibold">T57i 57nh ba</div>
+              <div className="text-sm font-semibold">Tải ảnh bìa</div>
               <input
                 type="file"
                 accept="image/*"
@@ -150,23 +140,29 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
                 onChange={(e) => handleUpload(e.target.files?.[0])}
               />
               <div className="text-xs admin-muted">
-                {uploading ? '03ang t57i 57nh...' : 'Ch69n 57nh 0469 upload ln h63 th63ng.'}
+                {uploading ? 'Đang tải ảnh...' : 'Chọn ảnh để upload lên hệ thống.'}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm mb-1">M00 t57 ng69n</label>
+              <label className="block text-sm mb-1">Mô tả ngắn</label>
               <textarea
-                className="admin-input w-full"
+                className="admin-input w-full md:max-h-[275px] md:overflow-y-auto"
                 rows={3}
+                maxLength={1000}
                 value={form.shortDescription}
                 onChange={(e) => handleChange('shortDescription', e.target.value)}
               />
+              {shortDescriptionLength >= 1000 && (
+                <div className="text-xs mt-1" style={{ color: '#ff8b8b' }}>
+                  Đã đạt giới hạn 1000 ký tự.
+                </div>
+              )}
             </div>
           </div>
 
           <div className="admin-panel p-4 space-y-3">
-            <div className="text-sm font-semibold">Xem tr0663c 57nh ba</div>
+            <div className="text-sm font-semibold">Xem trước ảnh bìa</div>
             <div
               className="rounded-lg border"
               style={{
@@ -179,60 +175,31 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
                 <img
                   src={form.coverImageUrl}
                   alt="Cover preview"
-                  className="h-full w-full object-cover rounded-lg"
+                  className="h-full w-full object-contain rounded-lg"
                 />
               ) : (
                 <div className="h-full w-full flex items-center justify-center text-xs admin-muted">
-                  Ch06a c 57nh ba
+                  Chưa có ảnh bìa
                 </div>
               )}
             </div>
-            <div className="text-xs admin-muted">Dn link 57nh ba 0469 hi69n th67 b57n xem tr0663c.</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-          <div>
-            <label className="block text-sm mb-1">Tr55ng thi</label>
-            <select
-              className="admin-input w-full"
-              value={form.storyStatus}
-              onChange={(e) => handleChange('storyStatus', e.target.value as StoryStatus)}
-            >
-              <option value="ONGOING">03ang ra</option>
-              <option value="COMPLETED">Hon thnh</option>
-              <option value="PAUSED">T55m d69ng</option>
-              <option value="DROPPED">Drop</option>
-            </select>
-            <div className="mt-2">
-              <StoryStatusBadge status={form.storyStatus} />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm mb-1">T67ng s63 ch0601ng</label>
-            <input
-              type="number"
-              className="admin-input w-full"
-              value={form.totalChapters}
-              onChange={(e) => handleChange('totalChapters', Number(e.target.value))}
-            />
-          </div>
-          <div className="flex items-center gap-3 mt-4 md:mt-7">
-            <button type="button" className={toggleClass(form.hot)} onClick={() => handleChange('hot', !form.hot)}>
-              {form.hot ? 'Hot: B67t' : 'Hot: T69t'}
-            </button>
-            <button
-              type="button"
-              className={toggleClass(form.recommended)}
-              onClick={() => handleChange('recommended', !form.recommended)}
-            >
-              {form.recommended ? '0367 c61: B67t' : '0367 c61: T69t'}
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className={toggleClass(form.recommended)}
+            onClick={() => handleChange('recommended', !form.recommended)}
+          >
+            {form.recommended ? 'Đề cử: Bật' : 'Đề cử: Tắt'}
+          </button>
+        </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold mb-2">Th69 lo55i</h3>
+          <h3 className="text-sm font-semibold mb-2">Thể loại</h3>
           <CategoryMultiSelect
             categories={categories}
             selectedIds={form.categoryIds}
@@ -250,7 +217,7 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
 
       {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
       <button type="submit" className="admin-button admin-button-primary" disabled={saving || uploading}>
-        {saving ? '03ang l06u...' : uploading ? '03ang upload...' : 'L06u'}
+        {saving ? 'Đang lưu...' : uploading ? 'Đang upload...' : 'Lưu'}
       </button>
     </form>
   )

@@ -25,7 +25,7 @@ const StoryCard = ({ story }: Props) => (
       </Link>
       <p className="text-sm muted line-clamp-2">{story.shortDescription}</p>
       <div className="text-xs muted">Tác giả: {story.authorName || 'N/A'}</div>
-      <div className="text-xs muted">Số chap: {story.totalChapters}</div>
+      <div className="text-xs muted">Số chương: {story.totalChapters}</div>
     </div>
   </div>
 )

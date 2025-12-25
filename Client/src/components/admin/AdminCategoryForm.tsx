@@ -21,7 +21,7 @@ const AdminCategoryForm = ({ initial, onSubmit, onCancel }: Props) => {
     try {
       await onSubmit(form, initial?.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Luu that bai')
+      setError(err instanceof Error ? err.message : 'L06u th59t b55i')
     } finally {
       setSaving(false)
     }
@@ -30,26 +30,22 @@ const AdminCategoryForm = ({ initial, onSubmit, onCancel }: Props) => {
   return (
     <form className="space-y-3" onSubmit={submit}>
       <div>
-        <label className="block text-sm mb-1">Tên</label>
+        <label className="block text-sm mb-1">Tn</label>
         <input
-          className="w-full border rounded px-3 py-2 bg-slate-800 text-white border-slate-700"
+          className="admin-input w-full"
           value={form.name}
           onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
           required
         />
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
       <div className="flex items-center gap-2">
-        <button
-          type="submit"
-          className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 disabled:opacity-50"
-          disabled={saving}
-        >
-          {saving ? 'Dang luu...' : 'Luu'}
+        <button type="submit" className="admin-button admin-button-primary" disabled={saving}>
+          {saving ? '03ang l06u...' : 'L06u'}
         </button>
         {onCancel && (
-          <button type="button" className="text-slate-600 text-sm" onClick={onCancel}>
-            Huy
+          <button type="button" className="admin-button admin-button-secondary" onClick={onCancel}>
+            H65y
           </button>
         )}
       </div>

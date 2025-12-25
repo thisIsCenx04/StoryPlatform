@@ -14,12 +14,12 @@ export const donationApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-    if (!res.ok) throw new Error('Tạo donate thất bại')
+    if (!res.ok) throw new Error('T55o donate th59t b55i')
     return (await res.json()) as Donation
   },
   async adminList(): Promise<Donation[]> {
     const res = await fetch(buildApiUrl('/api/admin/donations'), { headers: authHeaders() })
-    if (!res.ok) throw new Error('Không thể tải danh sách donate')
+    if (!res.ok) throw new Error('Kh00ng th69 t57i danh sch donate')
     return (await res.json()) as Donation[]
   },
   async updateStatus(id: string, status: DonationStatus): Promise<Donation> {
@@ -27,7 +27,7 @@ export const donationApi = {
       method: 'PUT',
       headers: authHeaders(),
     })
-    if (!res.ok) throw new Error('Cập nhật donate thất bại')
+    if (!res.ok) throw new Error('C67p nh67t donate th59t b55i')
     return (await res.json()) as Donation
   },
 }

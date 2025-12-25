@@ -35,8 +35,8 @@ const MainLayout = () => {
     <div className="min-h-screen flex flex-col" data-theme={theme}>
       {organization && <OrganizationJsonLd organization={organization} />}
       <Header />
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
-        <Breadcrumb items={[{ label: 'Trang chủ', to: '/' }]} />
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-0 pb-8">
+        {/* <Breadcrumb items={[{ label: 'Trang ch65', to: '/' }]} /> */}
         <Outlet />
       </main>
       <Footer />

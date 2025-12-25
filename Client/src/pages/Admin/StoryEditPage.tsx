@@ -22,7 +22,7 @@ const StoryEditPage = () => {
           categoryIds: data.categoryIds ?? [],
         })
       )
-      .catch((err) => setError(err instanceof Error ? err.message : 'Không t?i du?c truy?n'))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Kh00ng t57i 040661c truy63n'))
   }, [id])
 
   const handleSubmit = async (payload: StoryRequestPayload) => {
@@ -31,9 +31,21 @@ const StoryEditPage = () => {
     navigate('/admin/stories')
   }
 
-  if (error) return <p className="text-red-500">{error}</p>
-  if (!story) return <p className="text-white">Ðang t?i...</p>
-  return <StoryForm initialValue={story} onSubmit={handleSubmit} />
+  if (error) return <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>
+  if (!story) return <p className="admin-muted">03ang t57i...</p>
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+          Truy63n
+        </p>
+        <h1 className="text-2xl font-semibold">Ch65nh s61a truy63n</h1>
+        <p className="text-sm admin-muted">C67p nh67t n61i dung, ph09n lo55i v tr55ng thi.</p>
+      </div>
+      <StoryForm initialValue={story} onSubmit={handleSubmit} />
+    </div>
+  )
 }
 
 export default StoryEditPage

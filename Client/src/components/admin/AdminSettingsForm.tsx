@@ -22,7 +22,7 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
     try {
       await onSubmit(form)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Cập nhật thất bại')
+      setError(err instanceof Error ? err.message : 'C67p nh67t th59t b55i')
     } finally {
       setSaving(false)
     }
@@ -31,46 +31,42 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
   return (
     <form className="space-y-4" onSubmit={submit}>
       <div>
-        <label className="block text-sm mb-1">Site name</label>
+        <label className="block text-sm mb-1">Tn site</label>
         <input
-          className="w-full border rounded px-3 py-2"
+          className="admin-input w-full"
           value={form.siteName}
           onChange={(e) => setForm((prev) => ({ ...prev, siteName: e.target.value }))}
         />
       </div>
       <div>
-        <label className="block text-sm mb-1">Đường dẫn login ẩn (admin)</label>
+        <label className="block text-sm mb-1">030665ng d65n login 63n (admin)</label>
         <input
-          className="w-full border rounded px-3 py-2"
+          className="admin-input w-full"
           value={form.adminHiddenLoginPath}
           onChange={(e) => setForm((prev) => ({ ...prev, adminHiddenLoginPath: e.target.value }))}
         />
       </div>
       <div className="space-y-2">
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={form.copyProtectionEnabled}
             onChange={(e) => setForm((prev) => ({ ...prev, copyProtectionEnabled: e.target.checked }))}
           />
-          Bật chặn copy
+          B67t ch67n copy
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
             checked={form.scrapingProtectionEnabled}
             onChange={(e) => setForm((prev) => ({ ...prev, scrapingProtectionEnabled: e.target.checked }))}
           />
-          Bật chặn cào
+          B67t ch67n co
         </label>
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <button
-        type="submit"
-        className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700 disabled:opacity-50"
-        disabled={saving}
-      >
-        {saving ? 'Đang lưu...' : 'Lưu'}
+      {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
+      <button type="submit" className="admin-button admin-button-primary" disabled={saving}>
+        {saving ? '03ang l06u...' : 'L06u'}
       </button>
     </form>
   )

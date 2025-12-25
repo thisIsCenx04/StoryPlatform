@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 import StoryStatusBadge from '../../components/story/StoryStatusBadge'
@@ -18,7 +18,7 @@ const StoryManagementPage = () => {
       setStories(data)
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải danh sách')
+      setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i danh sch truy63n')
     } finally {
       setLoading(false)
     }
@@ -34,7 +34,7 @@ const StoryManagementPage = () => {
   }, [stories, keyword])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Xóa truyện này?')) return
+    if (!confirm('Xa truy63n ny?')) return
     await storyApi.remove(id)
     load()
   }
@@ -57,68 +57,75 @@ const StoryManagementPage = () => {
       await storyApi.update(story.id, payload)
       load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không cập nhật được trạng thái')
+      setError(err instanceof Error ? err.message : 'Kh00ng c67p nh67t 040661c tr55ng thi')
     }
   }
 
   const pillClass = (active: boolean) =>
-    `px-3 py-1 rounded-full text-xs font-semibold transition ${active ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'}`
+    `admin-button ${active ? 'admin-button-primary' : 'admin-button-secondary'} text-xs px-3 py-1`
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Quản lý truyện</h1>
-        <Link to="/admin/stories/create" className="bg-emerald-600 text-white px-4 py-2 rounded hover:bg-emerald-700">
-          Thêm truyện
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+            Truy63n
+          </p>
+          <h1 className="text-2xl font-semibold">Qu57n l05 truy63n</h1>
+          <p className="text-sm admin-muted">T55o m63i, ch65nh s61a, 04nh d59u n67i b67t.</p>
+        </div>
+        <Link to="/admin/stories/create" className="admin-button admin-button-primary">
+          Thm truy63n
         </Link>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="admin-card p-4 flex flex-wrap items-center gap-3">
         <input
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          className="border rounded px-3 py-2 w-full max-w-md bg-white text-slate-900 border-slate-300"
-          placeholder="Tìm kiếm truyện..."
+          className="admin-input w-full max-w-md"
+          placeholder="Tm ki65m truy63n..."
         />
+        <span className="text-xs admin-muted">T67ng: {filtered.length}</span>
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      {loading && <p className="text-sm text-slate-600">Đang tải...</p>}
+      {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
+      {loading && <p className="text-sm admin-muted">03ang t57i...</p>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm text-slate-900 bg-white rounded border border-slate-200">
+      <div className="admin-card overflow-x-auto">
+        <table className="admin-table text-sm">
           <thead>
-            <tr className="text-left text-slate-500 border-b border-slate-200">
-              <th className="px-3 py-2">Tên</th>
-              <th className="px-3 py-2">Trạng thái</th>
-              <th className="px-3 py-2">Hot</th>
-              <th className="px-3 py-2">Đề cử</th>
-              <th className="px-3 py-2 text-right">Thao tác</th>
+            <tr>
+              <th>Tn</th>
+              <th>Tr55ng thi</th>
+              <th>Hot</th>
+              <th>0367 c61</th>
+              <th className="text-right">Thao tc</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((story) => (
-              <tr key={story.id} className="border-t border-slate-200 hover:bg-slate-50">
-                <td className="px-3 py-2">{story.title}</td>
-                <td className="px-3 py-2">
+              <tr key={story.id}>
+                <td>{story.title}</td>
+                <td>
                   <StoryStatusBadge status={story.storyStatus} />
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <button className={pillClass(story.hot)} onClick={() => toggleFlag(story, 'hot')}>
-                    {story.hot ? 'Bật' : 'Tắt'}
+                    {story.hot ? 'B67t' : 'T69t'}
                   </button>
                 </td>
-                <td className="px-3 py-2">
+                <td>
                   <button className={pillClass(story.recommended)} onClick={() => toggleFlag(story, 'recommended')}>
-                    {story.recommended ? 'Bật' : 'Tắt'}
+                    {story.recommended ? 'B67t' : 'T69t'}
                   </button>
                 </td>
-                <td className="px-3 py-2 text-right space-x-2">
-                  <Link className="text-emerald-600" to={`/admin/stories/${story.id}/edit`}>
-                    Sửa
+                <td className="text-right space-x-3">
+                  <Link className="text-sm" style={{ color: 'var(--accent)' }} to={`/admin/stories/${story.id}/edit`}>
+                    S61a
                   </Link>
-                  <button className="text-rose-600" onClick={() => handleDelete(story.id)}>
-                    Xóa
+                  <button className="text-sm" style={{ color: '#ff8b8b' }} onClick={() => handleDelete(story.id)}>
+                    Xa
                   </button>
                 </td>
               </tr>

@@ -10,12 +10,12 @@ const authHeaders = (): Record<string, string> => {
 export const settingsApi = {
   async getPublicSettings(): Promise<SiteSettings> {
     const res = await fetch(buildApiUrl('/api/settings/public'))
-    if (!res.ok) throw new Error('Không thể tải cài đặt')
+    if (!res.ok) throw new Error('Kh00ng th69 t57i ci 0467t')
     return (await res.json()) as SiteSettings
   },
   async getAdminSettings(): Promise<SiteSettings> {
     const res = await fetch(buildApiUrl('/api/admin/settings'), { headers: authHeaders() })
-    if (!res.ok) throw new Error('Không thể tải cài đặt (admin)')
+    if (!res.ok) throw new Error('Kh00ng th69 t57i ci 0467t (admin)')
     return (await res.json()) as SiteSettings
   },
   async updateSettings(payload: SiteSettings): Promise<SiteSettings> {
@@ -24,7 +24,7 @@ export const settingsApi = {
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(payload),
     })
-    if (!res.ok) throw new Error('Cập nhật cài đặt thất bại')
+    if (!res.ok) throw new Error('C67p nh67t ci 0467t th59t b55i')
     return (await res.json()) as SiteSettings
   },
 }

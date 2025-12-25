@@ -12,7 +12,7 @@ const SettingsPage = () => {
     settingsApi
       .getAdminSettings()
       .then(setSettings)
-      .catch((err) => setError(err instanceof Error ? err.message : 'Không thể tải cài đặt'))
+      .catch((err) => setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i ci 0467t'))
   }, [])
 
   const handleSubmit = async (payload: SiteSettings) => {
@@ -20,13 +20,19 @@ const SettingsPage = () => {
     setSettings(updated)
   }
 
-  if (error) return <p className="text-sm text-red-500">{error}</p>
-  if (!settings) return <p>Đang tải...</p>
+  if (error) return <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>
+  if (!settings) return <p className="admin-muted">03ang t57i...</p>
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Cài đặt hệ thống</h1>
-      <div className="bg-white border rounded p-4 shadow-sm">
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+          Ci 0467t
+        </p>
+        <h1 className="text-2xl font-semibold">C59u hnh h63 th63ng</h1>
+        <p className="text-sm admin-muted">Thi65t l67p 040665ng d65n 63n, b57o v63 n61i dung.</p>
+      </div>
+      <div className="admin-card p-5">
         <AdminSettingsForm initial={settings} onSubmit={handleSubmit} />
       </div>
     </div>

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { storyApi } from '../../services/api/storyApi'
 import { categoryApi } from '../../services/api/categoryApi'
@@ -6,26 +7,23 @@ import type { Story, StoryStatus } from '../../types/story'
 import type { Category } from '../../types/category'
 import StoryCard from '../../components/story/StoryCard'
 
-type SortKey = 'views' | 'likes' | 'chapters' | 'title'
+type SortKey = 'views'
 
 const statusOptions: { value: StoryStatus; label: string }[] = [
   { value: 'ONGOING', label: 'Đang ra' },
   { value: 'COMPLETED', label: 'Hoàn thành' },
-  { value: 'PAUSED', label: 'Tạm dừng' },
-  { value: 'DROPPED', label: 'Drop' },
 ]
 
 const sortOptions: { value: SortKey; label: string }[] = [
   { value: 'views', label: 'Lượt xem' },
-  { value: 'likes', label: 'Lượt thích' },
-  { value: 'chapters', label: 'Số chap' },
-  { value: 'title', label: 'Tên truyện' },
 ]
 
 const StoryListPage = () => {
   const [stories, setStories] = useState<Story[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [keyword, setKeyword] = useState('')
+  const location = useLocation()
+  const navigate = useNavigate()
   const [selectedStatuses, setSelectedStatuses] = useState<StoryStatus[]>([])
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<SortKey>('views')
@@ -40,6 +38,14 @@ const StoryListPage = () => {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const q = params.get('q') ?? ''
+    if (q !== keyword) {
+      setKeyword(q)
+    }
+  }, [location.search, keyword])
 
   const toggleStatus = (status: StoryStatus) => {
     setSelectedStatuses((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]))
@@ -64,98 +70,133 @@ const StoryListPage = () => {
     switch (sortBy) {
       case 'views':
         list.sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
-        break;
-      case 'likes':
-        list.sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
-        break;
-      case 'chapters':
-        list.sort((a, b) => (b.totalChapters ?? 0) - (a.totalChapters ?? 0))
-        break;
-      case 'title':
-        list.sort((a, b) => a.title.localeCompare(b.title))
-        break;
+        break
       default:
-        break;
+        break
     }
     return list
   }, [stories, keyword, selectedStatuses, selectedCategories, sortBy])
 
+  const clearSearch = () => {
+    setKeyword('')
+    navigate('/stories')
+  }
+
   return (
     <div className="space-y-6" style={{ color: 'var(--text)' }}>
-      <div className="surface rounded-lg p-4 shadow-sm space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <button className="px-4 py-2 rounded-md font-semibold" style={{ background: 'var(--card)', color: 'var(--text)' }}>
-            TÌM KIẾM
-          </button>
-          <input
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Nhập từ khóa"
-            className="flex-1 min-w-[200px] rounded px-3 py-2"
-            style={{ background: 'var(--input-bg)', color: 'var(--text)', border: '1px solid var(--border)' }}
-          />
-        </div>
-
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-            Trạng thái
-          </h4>
-          <div className="flex flex-wrap gap-3">
-            {statusOptions.map((opt) => (
-              <label key={opt.value} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                <input
-                  type="checkbox"
-                  checked={selectedStatuses.includes(opt.value)}
-                  onChange={() => toggleStatus(opt.value)}
-                />
-                {opt.label}
-              </label>
-            ))}
+      <div className="surface rounded-2xl p-6 border">
+        <div className="flex flex-wrap items-center gap-4 justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+              Danh sách truyện
+            </p>
+            <h1 className="home-title text-3xl">Khám phá kho truyện</h1>
+            <p className="muted text-sm mt-1">L?c theo th? lo?i, tr?ng th?i v? ?? quan t?m.</p>
           </div>
-        </div>
-
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-            Thể loại
-          </h4>
-          <div className="flex flex-wrap gap-3">
-            {categories.map((cat) => (
-              <label key={cat.id} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                <input type="checkbox" checked={selectedCategories.includes(cat.id)} onChange={() => toggleCategory(cat.id)} />
-                {cat.name}
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-            Sắp xếp
-          </h4>
-          <div className="flex flex-wrap gap-3">
-            {sortOptions.map((opt) => (
-              <label key={opt.value} className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-                <input type="radio" name="sort" checked={sortBy === opt.value} onChange={() => setSortBy(opt.value)} />
-                {opt.label}
-              </label>
-            ))}
-          </div>
+          {keyword && (
+            <div className="flex items-center gap-2">
+              <span
+                className="px-3 py-1 rounded-full text-xs"
+                style={{ background: 'rgba(59, 130, 246, 0.15)', color: 'var(--text)' }}
+              >
+                Kết qu?cho: {keyword}
+              </span>
+              <button className="text-xs hover:underline" style={{ color: 'var(--accent)' }} onClick={clearSearch}>
+                Xóa tìm kiếm
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {loading ? (
-        <p className="muted">Đang tải...</p>
-      ) : filtered.length ? (
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((s) => (
-            <StoryCard key={s.id} story={s} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center muted">Khu vực hiển thị kết quả tìm kiếm...</div>
-      )}
+      <div className="grid gap-6 lg:grid-cols-[0.32fr_0.68fr]">
+        <aside className="surface rounded-2xl p-5 border space-y-5">
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Trạng thái</h4>
+            <div className="flex flex-wrap gap-2">
+              {statusOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => toggleStatus(opt.value)}
+                  className="px-3 py-1 rounded-full text-xs border"
+                  style={{
+                    borderColor: selectedStatuses.includes(opt.value) ? 'rgba(59, 130, 246, 0.6)' : 'var(--border)',
+                    background: selectedStatuses.includes(opt.value) ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
+                    color: 'var(--text)',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Th? lo?i</h4>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => toggleCategory(cat.id)}
+                  className="px-3 py-1 rounded-full text-xs border"
+                  style={{
+                    borderColor: selectedCategories.includes(cat.id) ? 'rgba(59, 130, 246, 0.6)' : 'var(--border)',
+                    background: selectedCategories.includes(cat.id) ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
+                    color: 'var(--text)',
+                  }}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Sắp xếp</h4>
+            <div className="flex flex-wrap gap-2">
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSortBy(opt.value)}
+                  className="px-3 py-1 rounded-full text-xs border"
+                  style={{
+                    borderColor: sortBy === opt.value ? 'rgba(59, 130, 246, 0.6)' : 'var(--border)',
+                    background: sortBy === opt.value ? 'rgba(59, 130, 246, 0.18)' : 'transparent',
+                    color: 'var(--text)',
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm muted">Hi?n th? {filtered.length} truy?n</p>
+          </div>
+
+          {loading ? (
+            <p className="muted">Đang tải...</p>
+          ) : filtered.length ? (
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+              {filtered.map((s) => (
+                <StoryCard key={s.id} story={s} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center muted">Ch?a c? k?t qu? ph? h?p. H?y th? thay ??i b? l?c.</div>
+          )}
+        </section>
+      </div>
     </div>
   )
 }
 
 export default StoryListPage
+
+

@@ -17,7 +17,7 @@ const CategoryManagementPage = () => {
       const data = await categoryApi.listAdmin()
       setCategories(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải thể loại')
+      setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i th69 lo55i')
     }
   }
 
@@ -37,7 +37,7 @@ const CategoryManagementPage = () => {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Xóa thể loại này?')) return
+    if (!confirm('Xa th69 lo55i ny?')) return
     await categoryApi.remove(id)
     load()
   }
@@ -57,39 +57,46 @@ const CategoryManagementPage = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Quản lý thể loại</h1>
-        <button className="text-sm text-emerald-500 hover:text-emerald-400" onClick={startCreate}>
-          + Thêm thể loại
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+            Th69 lo55i
+          </p>
+          <h1 className="text-2xl font-semibold">Qu57n l05 th69 lo55i</h1>
+          <p className="text-sm admin-muted">Thm m63i, ch65nh s61a, s69p x65p danh m63c.</p>
+        </div>
+        <button className="admin-button admin-button-primary" onClick={startCreate}>
+          + Thm th69 lo55i
         </button>
       </div>
 
-      <input
-        className="border rounded px-3 py-2 w-full max-w-lg"
-        placeholder="Tìm kiếm thể loại..."
-        value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-      />
+      <div className="admin-card p-4 flex flex-wrap items-center gap-3">
+        <input
+          className="admin-input w-full max-w-lg"
+          placeholder="Tm ki65m th69 lo55i..."
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+        <span className="text-xs admin-muted">T67ng: {filtered.length}</span>
+      </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
 
       <AdminCategoryList categories={filtered} onEdit={startEdit} onDelete={handleDelete} />
 
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-slate-900 text-white rounded-lg shadow-xl w-full max-w-xl p-5 space-y-3 border border-slate-700">
+          <div className="admin-card w-full max-w-xl p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">{editing ? 'Chỉnh sửa thể loại' : 'Thêm thể loại'}</h2>
-              <button className="text-slate-200 hover:text-white" onClick={() => setModalOpen(false)}>
-                Đóng
+              <h2 className="text-lg font-semibold">
+                {editing ? 'Ch65nh s61a th69 lo55i' : 'Thm th69 lo55i'}
+              </h2>
+              <button className="admin-button admin-button-secondary" onClick={() => setModalOpen(false)}>
+                03ng
               </button>
             </div>
-            <AdminCategoryForm
-              initial={editing}
-              onSubmit={handleSubmit}
-              onCancel={() => setModalOpen(false)}
-            />
+            <AdminCategoryForm initial={editing} onSubmit={handleSubmit} onCancel={() => setModalOpen(false)} />
           </div>
         </div>
       )}

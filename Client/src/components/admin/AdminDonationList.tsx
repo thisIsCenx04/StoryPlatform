@@ -6,35 +6,35 @@ interface Props {
 }
 
 const AdminDonationList = ({ donations, onStatusChange }: Props) => {
-  if (!donations.length) return <p className="text-sm text-slate-500">Chưa có donate nào.</p>
+  if (!donations.length) return <p className="text-sm admin-muted">Ch06a c l0661t 65ng h61 no.</p>
 
   return (
-    <div className="overflow-x-auto border rounded">
-      <table className="min-w-full text-sm">
-        <thead className="bg-slate-50">
-          <tr className="text-left text-slate-500">
-            <th className="px-3 py-2">Người ủng hộ</th>
-            <th className="px-3 py-2">Số tiền</th>
-            <th className="px-3 py-2">Phương thức</th>
-            <th className="px-3 py-2">Trạng thái</th>
-            <th className="px-3 py-2 text-right">Actions</th>
+    <div className="admin-card overflow-x-auto">
+      <table className="admin-table text-sm">
+        <thead>
+          <tr>
+            <th>Ng0665i 65ng h61</th>
+            <th>S63 ti67n</th>
+            <th>Ph0601ng th67c</th>
+            <th>Tr55ng thi</th>
+            <th className="text-right">Thao tc</th>
           </tr>
         </thead>
         <tbody>
           {donations.map((d) => (
-            <tr key={d.id} className="border-t">
-              <td className="px-3 py-2">{d.donorName}</td>
-              <td className="px-3 py-2">
+            <tr key={d.id}>
+              <td>{d.donorName || '62n danh'}</td>
+              <td>
                 {d.amount} {d.currency}
               </td>
-              <td className="px-3 py-2 text-slate-500">{d.paymentMethod}</td>
-              <td className="px-3 py-2 text-slate-500">{d.status}</td>
-              <td className="px-3 py-2 text-right space-x-2">
-                <button className="text-emerald-600" onClick={() => onStatusChange(d.id, 'SUCCESS')}>
-                  Đánh dấu nhận
+              <td className="admin-muted">{d.paymentMethod || 'N/A'}</td>
+              <td className="admin-muted">{d.status}</td>
+              <td className="text-right space-x-2">
+                <button className="admin-button admin-button-secondary text-xs" onClick={() => onStatusChange(d.id, 'SUCCESS')}>
+                  Xc nh67n
                 </button>
-                <button className="text-rose-600" onClick={() => onStatusChange(d.id, 'FAILED')}>
-                  Đánh dấu fail
+                <button className="admin-button admin-button-danger text-xs" onClick={() => onStatusChange(d.id, 'FAILED')}>
+                  03nh d59u fail
                 </button>
               </td>
             </tr>

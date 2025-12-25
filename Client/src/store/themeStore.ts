@@ -3,7 +3,7 @@ const STORAGE_KEY = 'storysite_theme'
 export type ThemeMode = 'light' | 'dark'
 
 const defaultTheme: ThemeMode =
-  (typeof window !== 'undefined' && (localStorage.getItem(STORAGE_KEY) as ThemeMode | null)) || 'dark'
+  (typeof window !== 'undefined' && (localStorage.getItem(STORAGE_KEY) as ThemeMode | null)) || 'light'
 
 let currentTheme: ThemeMode = defaultTheme
 const listeners = new Set<(theme: ThemeMode) => void>()

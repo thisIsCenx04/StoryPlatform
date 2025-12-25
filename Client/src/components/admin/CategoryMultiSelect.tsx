@@ -1,23 +1,18 @@
-﻿import type { Category } from '../../types/category'
+import type { Category } from '../../types/category'
 
 interface Props {
   categories: Category[]
   selectedIds: string[]
   onChange: (ids: string[]) => void
-  dark?: boolean
 }
 
-const CategoryMultiSelect = ({ categories, selectedIds, onChange, dark = false }: Props) => {
+const CategoryMultiSelect = ({ categories, selectedIds, onChange }: Props) => {
   const remaining = categories.filter((c) => !selectedIds.includes(c.id))
   const add = (id: string) => {
     if (!id) return
     onChange([...selectedIds, id])
   }
   const remove = (id: string) => onChange(selectedIds.filter((c) => c !== id))
-
-  const baseInput = dark
-    ? 'w-full border rounded px-3 py-2 bg-slate-800 text-white border-slate-700'
-    : 'w-full border rounded px-3 py-2 bg-white text-slate-900 border-slate-300'
 
   return (
     <div className="space-y-2">
@@ -27,21 +22,24 @@ const CategoryMultiSelect = ({ categories, selectedIds, onChange, dark = false }
           return (
             <span
               key={id}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs border border-emerald-200"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border"
+              style={{
+                background: 'rgba(255, 166, 99, 0.18)',
+                borderColor: 'rgba(255, 166, 99, 0.35)',
+                color: 'var(--text)',
+              }}
             >
               {cat?.name || id}
-              <button type="button" className="text-emerald-700 hover:text-emerald-900" onClick={() => remove(id)}>
-                ×
+              <button type="button" className="text-xs" onClick={() => remove(id)}>
+                x
               </button>
             </span>
           )
         })}
-        {!selectedIds.length && (
-          <span className={dark ? 'text-slate-400 text-sm' : 'text-slate-500 text-sm'}>Chưa chọn</span>
-        )}
+        {!selectedIds.length && <span className="text-sm admin-muted">Ch06a ch69n</span>}
       </div>
-      <select className={baseInput} value="" onChange={(e) => add(e.target.value)}>
-        <option value="">-- Chọn thể loại --</option>
+      <select className="admin-input w-full" value="" onChange={(e) => add(e.target.value)}>
+        <option value="">-- Ch69n th69 lo55i --</option>
         {remaining.map((cat) => (
           <option key={cat.id} value={cat.id}>
             {cat.name}

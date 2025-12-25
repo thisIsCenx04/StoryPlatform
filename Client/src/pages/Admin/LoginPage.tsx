@@ -1,5 +1,6 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+
 const LoginPage = () => {
   const { login, loading, error } = useAuth()
   const navigate = useNavigate()
@@ -14,34 +15,27 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="w-full max-w-md bg-white shadow rounded-lg p-6 border border-slate-200">
-        <h1 className="text-xl font-semibold text-slate-900 mb-1">Admin login</h1>
+    <div className="admin-shell flex items-center justify-center px-4">
+      <div className="admin-card w-full max-w-md p-6 space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+            StoryHub Admin
+          </p>
+          <h1 className="text-2xl font-semibold">0300ng nh67p qu57n tr67</h1>
+          <p className="text-sm admin-muted mt-1">Vui lng dng ti kho57n qu57n tr67 0469 ti65p t63c.</p>
+        </div>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Username</label>
-            <input
-              name="username"
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              required
-            />
+            <label className="block text-sm mb-1">Tn 0400ng nh67p</label>
+            <input name="username" className="admin-input w-full" required />
           </div>
           <div>
-            <label className="block text-sm text-slate-600 mb-1">Password</label>
-            <input
-              name="password"
-              type="password"
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-              required
-            />
+            <label className="block text-sm mb-1">M67t kh63u</label>
+            <input name="password" type="password" className="admin-input w-full" required />
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
+          <button type="submit" className="admin-button admin-button-primary w-full" disabled={loading}>
+            {loading ? '03ang 0400ng nh67p...' : '0300ng nh67p'}
           </button>
         </form>
       </div>

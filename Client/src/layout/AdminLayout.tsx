@@ -1,48 +1,50 @@
-﻿import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
+import { Outlet, Navigate, Link, useLocation } from 'react-router-dom'
 
 import { useAuth } from '../hooks/useAuth'
+import { apiConfig } from '../config/apiConfig'
 
 const AdminLayout = () => {
   const { isAuthenticated, logout } = useAuth()
   const location = useLocation()
 
   if (!isAuthenticated) {
-    return <Navigate to="/admin/login" replace />
+    return <Navigate to={apiConfig.adminLoginPagePath} replace />
   }
 
-  const linkCls = (path: string) =>
-    `block px-3 py-2 rounded-md text-sm ${location.pathname.startsWith(path) ? 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100' : 'text-slate-700 hover:bg-slate-100'}`
+  const linkCls = (path: string) => `admin-nav-link ${location.pathname.startsWith(path) ? 'active' : ''}`
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex">
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm">
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-          <div className="text-lg font-semibold">Admin</div>
+    <div className="admin-shell flex">
+      <aside className="admin-sidebar w-64 flex flex-col shadow-sm">
+        <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="admin-brand text-xl font-semibold">StoryHub Admin</div>
+          <p className="text-xs admin-muted mt-1">Qu57n tr67 n61i dung & v67n hnh</p>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           <Link className={linkCls('/admin/dashboard')} to="/admin/dashboard">
-            Dashboard
+            T67ng quan
           </Link>
           <Link className={linkCls('/admin/stories')} to="/admin/stories">
-            Truyện
+            Truy63n
           </Link>
           <Link className={linkCls('/admin/categories')} to="/admin/categories">
-            Thể loại
+            Th69 lo55i
           </Link>
           <Link className={linkCls('/admin/donations')} to="/admin/donations">
-            Ủng hộ
+            64ng h61
           </Link>
           <Link className={linkCls('/admin/settings')} to="/admin/settings">
-            Cài đặt
+            Ci 0467t
           </Link>
         </nav>
-        <div className="px-5 py-4 border-t border-slate-200 text-sm flex items-center justify-end bg-slate-50">
-          <button className="text-rose-600 hover:text-rose-700" onClick={logout}>
-            Logout
+        <div className="px-5 py-4 border-t text-sm flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <span className="admin-muted">03ang 0400ng nh67p</span>
+          <button className="admin-button admin-button-danger" onClick={logout}>
+            0300ng xu59t
           </button>
         </div>
       </aside>
-      <main className="flex-1 p-6 overflow-y-auto bg-slate-50">
+      <main className="flex-1 p-6 overflow-y-auto">
         <Outlet />
       </main>
     </div>

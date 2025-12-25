@@ -10,13 +10,14 @@ const CategoryManagementPage = () => {
   const [editing, setEditing] = React.useState<Category | null>(null)
   const [keyword, setKeyword] = React.useState('')
   const [error, setError] = React.useState<string | null>(null)
+  const [modalOpen, setModalOpen] = React.useState(false)
 
   const load = async () => {
     try {
       const data = await categoryApi.listAdmin()
       setCategories(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Khong the tai the loai')
+      setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i th69 lo55i')
     }
   }
 
@@ -31,11 +32,12 @@ const CategoryManagementPage = () => {
       await categoryApi.create(payload)
     }
     setEditing(null)
+    setModalOpen(false)
     load()
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Xoa the loai nay?')) return
+    if (!confirm('Xa th69 lo55i ny?')) return
     await categoryApi.remove(id)
     load()
   }
@@ -44,40 +46,60 @@ const CategoryManagementPage = () => {
     ? categories.filter((c) => c.name.toLowerCase().includes(keyword.toLowerCase()))
     : categories
 
+  const startCreate = () => {
+    setEditing(null)
+    setModalOpen(true)
+  }
+
+  const startEdit = (cat: Category) => {
+    setEditing(cat)
+    setModalOpen(true)
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Quan ly the loai</h1>
-        <button
-          className="text-sm text-emerald-600"
-          onClick={() => setEditing({ id: '', name: '', slug: '', description: '', parentId: null })}
-        >
-          + Them the loai
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
+            Th69 lo55i
+          </p>
+          <h1 className="text-2xl font-semibold">Qu57n l05 th69 lo55i</h1>
+          <p className="text-sm admin-muted">Thm m63i, ch65nh s61a, s69p x65p danh m63c.</p>
+        </div>
+        <button className="admin-button admin-button-primary" onClick={startCreate}>
+          + Thm th69 lo55i
         </button>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="admin-card p-4 flex flex-wrap items-center gap-3">
         <input
-          className="border rounded px-3 py-2 w-full max-w-md"
-          placeholder="Tim kiem the loai..."
+          className="admin-input w-full max-w-lg"
+          placeholder="Tm ki65m th69 lo55i..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
+        <span className="text-xs admin-muted">T67ng: {filtered.length}</span>
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
 
-      <AdminCategoryList categories={filtered} onEdit={(c) => setEditing(c)} onDelete={handleDelete} />
+      <AdminCategoryList categories={filtered} onEdit={startEdit} onDelete={handleDelete} />
 
-      <div className="border rounded p-4 bg-white shadow-sm">
-        <h2 className="text-lg font-semibold mb-2">{editing?.id ? 'Chinh sua' : 'Them moi'}</h2>
-        <AdminCategoryForm
-          initial={editing}
-          categories={categories}
-          onSubmit={handleSubmit}
-          onCancel={() => setEditing(null)}
-        />
-      </div>
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="admin-card w-full max-w-xl p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">
+                {editing ? 'Ch65nh s61a th69 lo55i' : 'Thm th69 lo55i'}
+              </h2>
+              <button className="admin-button admin-button-secondary" onClick={() => setModalOpen(false)}>
+                03ng
+              </button>
+            </div>
+            <AdminCategoryForm initial={editing} onSubmit={handleSubmit} onCancel={() => setModalOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

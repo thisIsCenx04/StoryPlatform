@@ -8,7 +8,4 @@ export interface Category {
 
 export interface CategoryPayload {
   name: string
-  slug: string
-  description?: string
-  parentId?: string | null
 }

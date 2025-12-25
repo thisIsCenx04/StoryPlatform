@@ -5,20 +5,22 @@ import java.util.UUID;
 
 import com.example.storysite.entity.StoryStatus;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StoryRequest {
-    @NotBlank
     @Size(max = 150)
     private String slug;
 
-    @NotBlank
+    @NotNull
     @Size(max = 200)
     private String title;
 

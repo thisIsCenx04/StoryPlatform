@@ -1,8 +1,12 @@
 package com.example.storysite.service;
 
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.text.Normalizer;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,12 +74,17 @@ public class StoryService {
         return storyRepository.findAll().stream().map(this::toResponseWithSections).toList();
     }
 
+    public StoryResponse getAdminById(UUID id) {
+        Story story = storyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Story not found"));
+        return toResponseWithSections(story);
+    }
+
     @Transactional
     public StoryResponse create(StoryRequest request) {
-        if (storyRepository.findBySlug(request.getSlug()).isPresent()) {
-            throw new BadRequestException("Slug đã tồn tại");
-        }
+        String slug = generateUniqueSlug(request.getSlug(), request.getTitle(), null);
         Story story = storyMapper.toEntity(request);
+        story.setSlug(slug);
         if (request.isRecommended()) {
             story.setRecommendedAt(OffsetDateTime.now());
         }
@@ -89,10 +98,8 @@ public class StoryService {
     public StoryResponse update(UUID id, StoryRequest request) {
         Story story = storyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Story not found"));
-        if (!story.getSlug().equals(request.getSlug()) && storyRepository.findBySlug(request.getSlug()).isPresent()) {
-            throw new BadRequestException("Slug đã tồn tại");
-        }
-        story.setSlug(request.getSlug());
+        String slug = generateUniqueSlug(request.getSlug(), request.getTitle(), story.getId());
+        story.setSlug(slug);
         story.setTitle(request.getTitle());
         story.setCoverImageUrl(request.getCoverImageUrl());
         story.setAuthorName(request.getAuthorName());
@@ -137,13 +144,9 @@ public class StoryService {
 
     private void handleSummarySections(Story story, List<StorySummarySectionDto> summarySections) {
         summarySectionRepository.deleteByStoryId(story.getId());
+        summarySectionRepository.flush();
         if (summarySections != null) {
-            List<StorySummarySection> entities = summarySections.stream()
-                    .map(dto -> {
-                        StorySummarySection section = storyMapper.toEntity(dto);
-                        section.setStory(story);
-                        return section;
-                    }).toList();
+            List<StorySummarySection> entities = normalizeSections(summarySections, story);
             summarySectionRepository.saveAll(entities);
         }
     }
@@ -172,15 +175,53 @@ public class StoryService {
         Story story = storyRepository.findById(storyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Story not found"));
         summarySectionRepository.deleteByStoryId(story.getId());
+        summarySectionRepository.flush();
         if (sections != null) {
-            List<StorySummarySection> entities = sections.stream()
-                    .map(dto -> {
-                        StorySummarySection section = storyMapper.toEntity(dto);
-                        section.setStory(story);
-                        return section;
-                    }).toList();
+            List<StorySummarySection> entities = normalizeSections(sections, story);
             summarySectionRepository.saveAll(entities);
         }
         return getSummary(storyId);
+    }
+
+    private String generateUniqueSlug(String requestedSlug, String title, UUID currentId) {
+        String base = (requestedSlug == null || requestedSlug.isBlank()) ? toSlug(title) : requestedSlug.trim().toLowerCase();
+        if (base.isBlank()) {
+            base = "story";
+        }
+        String slug = base;
+        int counter = 1;
+        while (true) {
+            var existing = storyRepository.findBySlug(slug);
+            if (existing.isEmpty() || (currentId != null && existing.get().getId().equals(currentId))) {
+                return slug;
+            }
+            slug = base + "-" + counter;
+            counter++;
+        }
+    }
+
+    private String toSlug(String input) {
+        if (input == null) return "";
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        String withoutDiacritics = Pattern.compile("\\p{M}+").matcher(normalized).replaceAll("");
+        return withoutDiacritics.trim()
+                .toLowerCase()
+                .replaceAll("\\s+", "-")
+                .replaceAll("-{2,}", "-")
+                .replaceAll("^-+|-+$", "");
+    }
+
+    private List<StorySummarySection> normalizeSections(List<StorySummarySectionDto> sections, Story story) {
+        AtomicInteger counter = new AtomicInteger(1);
+        return sections.stream()
+                .sorted(Comparator.comparing(StorySummarySectionDto::getSortOrder, Comparator.nullsLast(Integer::compareTo)))
+                .map(dto -> {
+                    StorySummarySection section = storyMapper.toEntity(dto);
+                    section.setId(null);
+                    section.setSortOrder(counter.getAndIncrement());
+                    section.setStory(story);
+                    return section;
+                })
+                .toList();
     }
 }

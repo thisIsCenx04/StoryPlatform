@@ -37,6 +37,11 @@ public class AdminStoryController {
         return ResponseEntity.ok(storyService.listAdmin());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<StoryResponse> getOne(@PathVariable UUID id) {
+        return ResponseEntity.ok(storyService.getAdminById(id));
+    }
+
     @PostMapping
     public ResponseEntity<StoryResponse> create(@Valid @RequestBody StoryRequest request) {
         return ResponseEntity.ok(storyService.create(request));

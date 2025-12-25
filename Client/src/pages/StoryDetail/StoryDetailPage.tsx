@@ -1,10 +1,9 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-import StoryStatusBadge from '../../components/story/StoryStatusBadge'
-import StorySummaryView from '../../components/story/StorySummaryView'
 import ArticleJsonLd from '../../components/seo/ArticleJsonLd'
 import BreadcrumbJsonLd from '../../components/seo/BreadcrumbJsonLd'
+import StoryCard from '../../components/story/StoryCard'
 import { storyApi } from '../../services/api/storyApi'
 import { seoApi } from '../../services/api/seoApi'
 import { categoryApi } from '../../services/api/categoryApi'
@@ -19,6 +18,7 @@ const StoryDetailPage = () => {
   const [articleSeo, setArticleSeo] = useState<SeoArticle | null>(null)
   const [breadcrumb, setBreadcrumb] = useState<SeoBreadcrumbList | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [relatedStories, setRelatedStories] = useState<Story[]>([])
 
   useEffect(() => {
     if (!slug) return
@@ -45,6 +45,28 @@ const StoryDetailPage = () => {
       .then(setCategories)
       .catch(() => setCategories([]))
   }, [])
+
+  useEffect(() => {
+    if (!story) return
+    storyApi
+      .list()
+      .then((list) => {
+        const related = list.filter(
+          (item) =>
+            item.slug !== story.slug &&
+            item.categoryIds?.some((id) => story.categoryIds?.includes(id))
+        )
+        related.sort((a, b) => {
+          if (a.recommended !== b.recommended) return a.recommended ? -1 : 1
+          if (a.hot !== b.hot) return a.hot ? -1 : 1
+          const viewDiff = (b.viewCount ?? 0) - (a.viewCount ?? 0)
+          if (viewDiff !== 0) return viewDiff
+          return a.title.localeCompare(b.title, 'vi')
+        })
+        setRelatedStories(related.slice(0, 6))
+      })
+      .catch(() => setRelatedStories([]))
+  }, [story])
 
   const categoryNames = useMemo(
     () => categories.filter((c) => story?.categoryIds?.includes(c.id)).map((c) => c.name),
@@ -76,7 +98,6 @@ const StoryDetailPage = () => {
 
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2 text-xs">
-              <StoryStatusBadge status={story.storyStatus} />
               {story.hot && <span className="px-2 py-1 rounded bg-rose-500 text-white">Hot</span>}
               {story.recommended && <span className="px-2 py-1 rounded bg-blue-600 text-white">Đề cử</span>}
             </div>
@@ -97,17 +118,19 @@ const StoryDetailPage = () => {
             )}
             <p className="text-sm muted">{story.shortDescription || 'Chưa có mô tả ngắn.'}</p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="rounded-lg border p-3 text-sm" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
-                <div className="muted text-xs">Số chương</div>
-                <div className="text-lg font-semibold">{story.totalChapters}</div>
-              </div>
-              <div className="rounded-lg border p-3 text-sm" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
-                <div className="muted text-xs">Lượt xem</div>
+                <div className="muted text-xs flex items-center gap-1">
+                  <span aria-hidden="true">👁</span>
+                  Lượt xem
+                </div>
                 <div className="text-lg font-semibold">{story.viewCount ?? 0}</div>
               </div>
               <div className="rounded-lg border p-3 text-sm" style={{ borderColor: 'var(--border)', background: 'var(--card)' }}>
-                <div className="muted text-xs">Lượt thích</div>
+                <div className="muted text-xs flex items-center gap-1">
+                  <span aria-hidden="true">❤️</span>
+                  Lượt thích
+                </div>
                 <div className="text-lg font-semibold">{story.likeCount ?? 0}</div>
               </div>
             </div>
@@ -124,9 +147,17 @@ const StoryDetailPage = () => {
         </div>
       </section>
 
-      <section id="summary" className="surface rounded-2xl p-6 border">
-        <h2 className="text-xl font-semibold mb-4">Tóm tắt</h2>
-        <StorySummaryView sections={story.summarySections} />
+      <section className="surface rounded-2xl p-6 border">
+        <h2 className="text-xl font-semibold mb-4">Truyện liên quan</h2>
+        {relatedStories.length ? (
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedStories.map((item) => (
+              <StoryCard key={item.id} story={item} categories={categories} />
+            ))}
+          </div>
+        ) : (
+          <p className="muted">Chưa có truyện liên quan.</p>
+        )}
       </section>
     </article>
   )

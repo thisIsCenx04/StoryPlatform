@@ -13,13 +13,13 @@ export const storyApi = {
     if (params?.hot) query.append('hot', 'true')
     if (params?.recommended) query.append('recommended', 'true')
     const res = await fetch(buildApiUrl(`/api/stories${query.toString() ? `?${query.toString()}` : ''}`))
-    if (!res.ok) throw new Error('Kh�ng th? t?i danh s�ch truy?n')
+    if (!res.ok) throw new Error('Không thể tải danh sách truyện')
     return (await res.json()) as Story[]
   },
 
   async getBySlug(slug: string): Promise<Story> {
     const res = await fetch(buildApiUrl(`/api/stories/${slug}`))
-    if (!res.ok) throw new Error('Kh�ng t�m th?y truy?n')
+    if (!res.ok) throw new Error('Không tìm thấy truyện')
     return (await res.json()) as Story
   },
 
@@ -32,13 +32,13 @@ export const storyApi = {
 
   async adminList(): Promise<Story[]> {
     const res = await fetch(buildApiUrl('/api/admin/stories'), { headers: authHeaders() })
-    if (!res.ok) throw new Error('Kh�ng th? t?i danh s�ch truy?n (admin)')
+    if (!res.ok) throw new Error('Không thể tải danh sách truyện (admin)')
     return (await res.json()) as Story[]
   },
 
   async adminGet(id: string): Promise<Story> {
     const res = await fetch(buildApiUrl(`/api/admin/stories/${id}`), { headers: authHeaders() })
-    if (!res.ok) throw new Error('Kh�ng t�m th?y truy?n')
+    if (!res.ok) throw new Error('Không tìm thấy truyện')
     return (await res.json()) as Story
   },
 
@@ -48,7 +48,7 @@ export const storyApi = {
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(payload),
     })
-    if (!res.ok) throw new Error('T?o truy?n th?t b?i')
+    if (!res.ok) throw new Error('Tạo truyện thất bại')
     return (await res.json()) as Story
   },
 
@@ -58,7 +58,7 @@ export const storyApi = {
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(payload),
     })
-    if (!res.ok) throw new Error('C?p nh?t truy?n th?t b?i')
+    if (!res.ok) throw new Error('Cập nhật truyện thất bại')
     return (await res.json()) as Story
   },
 
@@ -67,12 +67,12 @@ export const storyApi = {
       method: 'DELETE',
       headers: authHeaders(),
     })
-    if (!res.ok) throw new Error('X�a truy?n th?t b?i')
+    if (!res.ok) throw new Error('Xóa truyện thất bại')
   },
 
   async getSummary(id: string) {
     const res = await fetch(buildApiUrl(`/api/admin/stories/${id}/summary`), { headers: authHeaders() })
-    if (!res.ok) throw new Error('Kh�ng t?i du?c t�m t?t')
+    if (!res.ok) throw new Error('Không tải được tóm tắt')
     return (await res.json()) as StorySummarySection[]
   },
 
@@ -82,7 +82,7 @@ export const storyApi = {
       headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(sections),
     })
-    if (!res.ok) throw new Error('C?p nh?t t�m t?t th?t b?i')
+    if (!res.ok) throw new Error('Cập nhật tóm tắt thất bại')
     return (await res.json()) as StorySummarySection[]
   },
 }

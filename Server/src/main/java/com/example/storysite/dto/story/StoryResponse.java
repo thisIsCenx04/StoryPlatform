@@ -4,13 +4,15 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.example.storysite.entity.StoryStatus;
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class StoryResponse {
     private UUID id;
     private String slug;
@@ -18,8 +20,6 @@ public class StoryResponse {
     private String coverImageUrl;
     private String authorName;
     private String shortDescription;
-    private StoryStatus storyStatus;
-    private Integer totalChapters;
     private boolean hot;
     private boolean recommended;
     private OffsetDateTime recommendedAt;

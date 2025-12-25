@@ -1,9 +1,8 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { categoryApi } from '../../../services/api/categoryApi'
 import type { Category } from '../../../types/category'
-import type { Story, StoryRequestPayload, StoryStatus, StorySummarySection } from '../../../types/story'
-import StoryStatusBadge from '../../../components/story/StoryStatusBadge'
+import type { Story, StoryRequestPayload, StorySummarySection } from '../../../types/story'
 import StorySummaryEditor from '../../../components/story/StorySummaryEditor'
 import CategoryMultiSelect from '../../../components/admin/CategoryMultiSelect'
 import { uploadApi } from '../../../services/api/uploadApi'
@@ -24,8 +23,6 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
           coverImageUrl: initialValue.coverImageUrl || '',
           authorName: initialValue.authorName || '',
           shortDescription: initialValue.shortDescription || '',
-          storyStatus: initialValue.storyStatus,
-          totalChapters: initialValue.totalChapters ?? 0,
           hot: initialValue.hot,
           recommended: initialValue.recommended,
           categoryIds: initialValue.categoryIds ?? [],
@@ -43,8 +40,6 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
           coverImageUrl: '',
           authorName: '',
           shortDescription: '',
-          storyStatus: 'ONGOING',
-          totalChapters: 0,
           hot: false,
           recommended: false,
           categoryIds: [],
@@ -66,6 +61,8 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
   const handleChange = (field: keyof StoryRequestPayload, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
+
+  const shortDescriptionLength = form.shortDescription?.length ?? 0
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -109,10 +106,12 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
         <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_0.7fr] gap-6">
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm mb-1">Slug</label>
-                <input className="admin-input w-full" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} />
-              </div>
+              {!initialValue && (
+                <div>
+                  <label className="block text-sm mb-1">Slug</label>
+                  <input className="admin-input w-full" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} />
+                </div>
+              )}
               <div>
                 <label className="block text-sm mb-1">Tiêu đề</label>
                 <input
@@ -128,15 +127,6 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
                   className="admin-input w-full"
                   value={form.authorName}
                   onChange={(e) => handleChange('authorName', e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Hình bìa (URL)</label>
-                <input
-                  className="admin-input w-full"
-                  value={form.coverImageUrl}
-                  onChange={(e) => handleChange('coverImageUrl', e.target.value)}
-                  placeholder="https://..."
                 />
               </div>
             </div>
@@ -157,11 +147,17 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
             <div>
               <label className="block text-sm mb-1">Mô tả ngắn</label>
               <textarea
-                className="admin-input w-full"
+                className="admin-input w-full md:max-h-[275px] md:overflow-y-auto"
                 rows={3}
+                maxLength={1000}
                 value={form.shortDescription}
                 onChange={(e) => handleChange('shortDescription', e.target.value)}
               />
+              {shortDescriptionLength >= 1000 && (
+                <div className="text-xs mt-1" style={{ color: '#ff8b8b' }}>
+                  Đã đạt giới hạn 1000 ký tự.
+                </div>
+              )}
             </div>
           </div>
 
@@ -187,48 +183,19 @@ const StoryForm = ({ initialValue, onSubmit }: Props) => {
                 </div>
               )}
             </div>
-            <div className="text-xs admin-muted">Dán link ảnh bìa để hiện phần xem trước.</div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-          <div>
-            <label className="block text-sm mb-1">Trạng thái</label>
-            <select
-              className="admin-input w-full"
-              value={form.storyStatus}
-              onChange={(e) => handleChange('storyStatus', e.target.value as StoryStatus)}
-            >
-              <option value="ONGOING">Đang ra</option>
-              <option value="COMPLETED">Hoàn thành</option>
-              <option value="PAUSED">Tạm dừng</option>
-              <option value="DROPPED">Bỏ dở</option>
-            </select>
-            <div className="mt-2">
-              <StoryStatusBadge status={form.storyStatus} />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm mb-1">Tổng số chương</label>
-            <input
-              type="number"
-              className="admin-input w-full"
-              value={form.totalChapters}
-              onChange={(e) => handleChange('totalChapters', Number(e.target.value))}
-            />
-          </div>
-          <div className="flex items-center gap-3 mt-4 md:mt-7">
-            <button type="button" className={toggleClass(form.hot)} onClick={() => handleChange('hot', !form.hot)}>
-              {form.hot ? 'Hot: Bật' : 'Hot: Tắt'}
-            </button>
-            <button
-              type="button"
-              className={toggleClass(form.recommended)}
-              onClick={() => handleChange('recommended', !form.recommended)}
-            >
-              {form.recommended ? 'Đề cử: Bật' : 'Đề cử: Tắt'}
-            </button>
-          </div>
+        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            className={toggleClass(form.recommended)}
+            onClick={() => handleChange('recommended', !form.recommended)}
+          >
+            {form.recommended ? 'Đề cử: Bật' : 'Đề cử: Tắt'}
+          </button>
+        </div>
         </div>
 
         <div>

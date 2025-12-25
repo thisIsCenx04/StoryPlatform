@@ -17,6 +17,7 @@ import DonatePage from '../pages/Donate/DonatePage'
 import DonationManagementPage from '../pages/Admin/DonationManagementPage'
 import SettingsPage from '../pages/Admin/SettingsPage'
 import StoryListPage from '../pages/StoryList/StoryListPage'
+import CategoryListPage from '../pages/CategoryList/CategoryListPage'
 import { storyApi } from '../services/api/storyApi'
 import { donationApi } from '../services/api/donationApi'
 import { categoryApi } from '../services/api/categoryApi'
@@ -230,6 +231,7 @@ const AppRoutes = () => (
       <Route path="/stories" element={<StoryListPage />} />
       <Route path="/stories/:slug" element={<StoryDetailPage />} />
       <Route path="/stories/:slug/read" element={<StoryReadPage />} />
+      <Route path="/categories" element={<CategoryListPage />} />
       <Route path="/donate" element={<DonatePage />} />
     </Route>
 

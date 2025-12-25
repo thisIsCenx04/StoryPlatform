@@ -1,5 +1,3 @@
-export type StoryStatus = 'ONGOING' | 'COMPLETED' | 'PAUSED' | 'DROPPED'
-
 export interface StorySummarySection {
   id?: string
   tempId?: string
@@ -15,8 +13,6 @@ export interface Story {
   coverImageUrl?: string
   authorName?: string
   shortDescription?: string
-  storyStatus: StoryStatus
-  totalChapters: number
   hot: boolean
   recommended: boolean
   viewCount?: number
@@ -37,8 +33,6 @@ export interface StoryRequestPayload {
   coverImageUrl?: string
   authorName?: string
   shortDescription?: string
-  storyStatus: StoryStatus
-  totalChapters: number
   hot: boolean
   recommended: boolean
   categoryIds: string[]

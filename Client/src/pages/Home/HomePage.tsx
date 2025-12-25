@@ -5,12 +5,15 @@ import StoryFilterBar from '../../components/story/StoryFilterBar'
 import StoryList from '../../components/story/StoryList'
 import StoryCardCompact from '../../components/story/StoryCardCompact'
 import { storyApi } from '../../services/api/storyApi'
+import { categoryApi } from '../../services/api/categoryApi'
 import type { Story } from '../../types/story'
+import type { Category } from '../../types/category'
 import BreadcrumbJsonLd from '../../components/seo/BreadcrumbJsonLd'
 import { createSimpleBreadcrumb } from '../../utils/seoHelpers'
 
 const HomePage = () => {
   const [stories, setStories] = useState<Story[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,6 +36,13 @@ const HomePage = () => {
 
   useEffect(() => {
     fetchStories()
+  }, [])
+
+  useEffect(() => {
+    categoryApi
+      .list()
+      .then(setCategories)
+      .catch(() => setCategories([]))
   }, [])
 
   const hotStories = useMemo(() => stories.filter((s) => s.hot).slice(0, 6), [stories])
@@ -98,17 +108,12 @@ const HomePage = () => {
                     <span className="px-3 py-1 rounded-full bg-blue-600/90 text-white shadow-sm">Đề cử</span>
                   )}
                   {bannerStory.hot && <span className="px-3 py-1 rounded-full bg-rose-500/90 text-white shadow-sm">Hot</span>}
-                  <span className="px-3 py-1 rounded-full border border-white/30 bg-white/10 backdrop-blur text-white">
-                    {bannerStory.storyStatus}
-                  </span>
                 </div>
                 <div className="text-2xl md:text-3xl font-semibold mt-3 text-white drop-shadow-sm">
                   {bannerStory.title}
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-sm text-white/85 mt-2">
                   <span>Tác giả: {bannerStory.authorName || 'N/A'}</span>
-                  <span className="h-1 w-1 rounded-full bg-white/40" />
-                  <span>{bannerStory.totalChapters} chương</span>
                 </div>
                 <div className="mt-4">
                   <Link
@@ -195,7 +200,7 @@ const HomePage = () => {
         </div>
         <StoryFilterBar onFilter={fetchStories} />
         {error && <p className="text-sm text-red-600">{error}</p>}
-        {loading ? <p>Đang tải...</p> : <StoryList stories={stories} />}
+        {loading ? <p>Đang tải...</p> : <StoryList stories={stories} categories={categories} />}
       </div>
     </section>
   )

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import StoryStatusBadge from '../../components/story/StoryStatusBadge'
 import { storyApi } from '../../services/api/storyApi'
 import type { Story, StoryRequestPayload } from '../../types/story'
 
@@ -39,7 +38,7 @@ const StoryManagementPage = () => {
     load()
   }
 
-  const toggleFlag = async (story: Story, field: 'hot' | 'recommended') => {
+  const toggleRecommended = async (story: Story) => {
     try {
       const payload: StoryRequestPayload = {
         slug: story.slug || '',
@@ -47,17 +46,15 @@ const StoryManagementPage = () => {
         coverImageUrl: story.coverImageUrl || '',
         authorName: story.authorName || '',
         shortDescription: story.shortDescription || '',
-        storyStatus: story.storyStatus,
-        totalChapters: story.totalChapters ?? 0,
-        hot: field === 'hot' ? !story.hot : story.hot,
-        recommended: field === 'recommended' ? !story.recommended : story.recommended,
+        hot: story.hot,
+        recommended: !story.recommended,
         categoryIds: story.categoryIds ?? [],
         summarySections: story.summarySections ?? [],
       }
       await storyApi.update(story.id, payload)
       load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không cập nhật được trạng thái')
+      setError(err instanceof Error ? err.message : 'Không cập nhật được truyện')
     }
   }
 
@@ -97,8 +94,6 @@ const StoryManagementPage = () => {
           <thead>
             <tr>
               <th className="min-w-[180px]">Tên</th>
-              <th>Trạng thái</th>
-              <th>Hot</th>
               <th>Đề cử</th>
               <th className="text-right">Thao tác</th>
             </tr>
@@ -118,15 +113,7 @@ const StoryManagementPage = () => {
                   <span>{story.title}</span>
                 </td>
                 <td>
-                  <StoryStatusBadge status={story.storyStatus} />
-                </td>
-                <td>
-                  <button className={pillClass(story.hot)} onClick={() => toggleFlag(story, 'hot')}>
-                    {story.hot ? 'Bật' : 'Tắt'}
-                  </button>
-                </td>
-                <td>
-                  <button className={pillClass(story.recommended)} onClick={() => toggleFlag(story, 'recommended')}>
+                  <button className={pillClass(story.recommended)} onClick={() => toggleRecommended(story)}>
                     {story.recommended ? 'Bật' : 'Tắt'}
                   </button>
                 </td>

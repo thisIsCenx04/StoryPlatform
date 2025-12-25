@@ -17,6 +17,7 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
     Optional<Story> findBySlug(String slug);
     List<Story> findByHotTrue();
     List<Story> findByRecommendedTrue();
+    List<Story> findByViewCountGreaterThanEqual(Long viewCount);
     List<Story> findDistinctByCategoriesCategorySlug(String slug);
 
     @Modifying
@@ -25,4 +26,8 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
 
     @Query("select s.viewCount from Story s where s.slug = :slug")
     Optional<Long> findViewCountBySlug(@Param("slug") String slug);
+
+    @Modifying
+    @Query("update Story s set s.hot = true where s.slug = :slug and s.hot = false")
+    int markHotBySlug(@Param("slug") String slug);
 }

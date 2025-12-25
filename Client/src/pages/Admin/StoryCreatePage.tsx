@@ -11,7 +11,6 @@ const StoryCreatePage = () => {
   const navigate = useNavigate()
   const [title, setTitle] = React.useState('')
   const [authorName, setAuthorName] = React.useState('')
-  const [storyStatus, setStoryStatus] = React.useState<StoryRequestPayload['storyStatus']>('ONGOING')
   const [categoryIds, setCategoryIds] = React.useState<string[]>([])
   const [categories, setCategories] = React.useState<Category[]>([])
   const [saving, setSaving] = React.useState(false)
@@ -32,8 +31,6 @@ const StoryCreatePage = () => {
         coverImageUrl: '',
         authorName,
         shortDescription: '',
-        storyStatus,
-        totalChapters: 0,
         hot: false,
         recommended: false,
         categoryIds,
@@ -66,17 +63,6 @@ const StoryCreatePage = () => {
           <div>
             <label className="block text-sm mb-1">Tác giả</label>
             <input className="admin-input w-full" value={authorName} onChange={(e) => setAuthorName(e.target.value)} />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm mb-1">Trạng thái</label>
-            <select className="admin-input w-full" value={storyStatus} onChange={(e) => setStoryStatus(e.target.value as any)}>
-              <option value="ONGOING">Đang ra</option>
-              <option value="COMPLETED">Hoàn thành</option>
-              <option value="PAUSED">Tạm dừng</option>
-              <option value="DROPPED">Bỏ dở</option>
-            </select>
           </div>
         </div>
         <div>

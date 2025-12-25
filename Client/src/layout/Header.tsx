@@ -1,70 +1,79 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
+import { categoryApi } from '../services/api/categoryApi'
 import { useTheme } from '../hooks/useTheme'
-import { storyApi } from '../services/api/storyApi'
-import type { Story } from '../types/story'
+import type { Category } from '../types/category'
+
+const DROPDOWN_OPEN_DELAY_MS = 120
+const DROPDOWN_CLOSE_DELAY_MS = 200
 
 const Header = () => {
   const { theme, toggle } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
-  const [keyword, setKeyword] = useState('')
-  const [stories, setStories] = useState<Story[]>([])
-  const [isFocused, setIsFocused] = useState(false)
   const isActive = (path: string) => location.pathname.startsWith(path)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [keyword, setKeyword] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
-    storyApi
+    categoryApi
       .list()
-      .then((data) => setStories(data))
-      .catch(() => setStories([]))
+      .then((data) => setCategories(data))
+      .catch(() => setCategories([]))
   }, [])
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const q = params.get('q') ?? ''
-    if (q && q !== keyword) {
+    if (q !== keyword) {
       setKeyword(q)
     }
   }, [keyword, location.search])
 
-  const suggestions = useMemo(() => {
-    const q = keyword.trim().toLowerCase()
-    if (!q) return []
-    return stories
-      .map((story) => {
-        const title = story.title?.toLowerCase() ?? ''
-        const author = story.authorName?.toLowerCase() ?? ''
-        const slug = story.slug?.toLowerCase() ?? ''
-        let score = -1
-        if (title.startsWith(q)) score = 0
-        else if (title.includes(q)) score = 1
-        else if (author.includes(q)) score = 2
-        else if (slug.includes(q)) score = 3
-        if (score < 0) return null
-        return { story, score }
-      })
-      .filter((item): item is { story: Story; score: number } => Boolean(item))
-      .sort((a, b) => {
-        if (a.score !== b.score) return a.score - b.score
-        const viewsDiff = (b.story.viewCount ?? 0) - (a.story.viewCount ?? 0)
-        if (viewsDiff !== 0) return viewsDiff
-        return a.story.title.localeCompare(b.story.title)
-      })
-      .slice(0, 6)
-      .map((item) => item.story)
-  }, [keyword, stories])
+  useEffect(() => {
+    return () => {
+      if (openTimerRef.current) clearTimeout(openTimerRef.current)
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    }
+  }, [])
+
+  const sortedCategories = useMemo(() => {
+    return [...categories].sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+  }, [categories])
+
+  const categoryColumns = useMemo(() => {
+    const chunkSize = 10
+    const chunks: Category[][] = []
+    for (let i = 0; i < sortedCategories.length; i += chunkSize) {
+      chunks.push(sortedCategories.slice(i, i + chunkSize))
+    }
+    return chunks
+  }, [sortedCategories])
+
+  const scheduleOpen = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+    }
+    openTimerRef.current = setTimeout(() => setIsDropdownOpen(true), DROPDOWN_OPEN_DELAY_MS)
+  }
+
+  const scheduleClose = () => {
+    if (openTimerRef.current) {
+      clearTimeout(openTimerRef.current)
+      openTimerRef.current = null
+    }
+    closeTimerRef.current = setTimeout(() => setIsDropdownOpen(false), DROPDOWN_CLOSE_DELAY_MS)
+  }
 
   const submitSearch = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const value = keyword.trim()
     navigate(`/stories${value ? `?q=${encodeURIComponent(value)}` : ''}`)
-  }
-
-  const selectSuggestion = (story: Story) => {
-    setKeyword(story.title)
-    navigate(`/stories?q=${encodeURIComponent(story.title)}`)
   }
 
   return (
@@ -87,17 +96,6 @@ const Header = () => {
 
         <nav className="flex items-center gap-4">
           <Link
-            to="/"
-            className={`px-1 py-1 transition-colors ${isActive('/') ? 'font-semibold border-b-2 pb-1' : ''}`}
-            style={
-              isActive('/')
-                ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
-                : { color: 'var(--text)', borderColor: 'transparent' }
-            }
-          >
-            Trang chủ
-          </Link>
-          <Link
             to="/stories"
             className={`px-1 py-1 transition-colors ${isActive('/stories') ? 'font-semibold border-b-2 pb-1' : ''}`}
             style={
@@ -108,6 +106,49 @@ const Header = () => {
           >
             Truyện
           </Link>
+          <div className="relative" onMouseEnter={scheduleOpen} onMouseLeave={scheduleClose}>
+            <Link
+              to="/categories"
+              className={`px-1 py-1 transition-colors ${isActive('/categories') ? 'font-semibold border-b-2 pb-1' : ''}`}
+              style={
+                isActive('/categories')
+                  ? { borderColor: 'var(--accent)', color: 'var(--accent)' }
+                  : { color: 'var(--text)', borderColor: 'transparent' }
+              }
+              onFocus={scheduleOpen}
+              onBlur={scheduleClose}
+            >
+              Thể loại
+            </Link>
+            <div
+              className={`absolute left-0 top-full mt-2 z-30 transition ${
+                isDropdownOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+              }`}
+            >
+              <div className="surface rounded-xl p-3 shadow-lg">
+                {categoryColumns.length ? (
+                  <div className="grid gap-6 text-sm" style={{ gridAutoFlow: 'column', gridAutoColumns: 'minmax(160px, 1fr)' }}>
+                    {categoryColumns.map((column, colIndex) => (
+                      <div key={`col-${colIndex}`} className="grid gap-1">
+                        {column.map((category) => (
+                          <Link
+                            key={category.id}
+                            to={`/categories?category=${encodeURIComponent(category.slug)}`}
+                            className="px-2 py-1 rounded hover:bg-slate-100/10 transition"
+                            style={{ color: 'var(--text)' }}
+                          >
+                            {category.name}
+                          </Link>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="px-2 py-1 text-xs muted">Chưa có thể loại</span>
+                )}
+              </div>
+            </div>
+          </div>
           <Link
             to="/donate"
             className={`px-1 py-1 transition-colors ${isActive('/donate') ? 'font-semibold border-b-2 pb-1' : ''}`}
@@ -121,58 +162,33 @@ const Header = () => {
           </Link>
         </nav>
 
-        <div className="flex-1" />
-
-        <form onSubmit={submitSearch} className="flex items-center gap-2">
-          <div className="relative hidden sm:block">
+        <div className="ml-auto flex items-center gap-3">
+          <form onSubmit={submitSearch} className="flex items-center gap-2">
             <input
               value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+              onChange={(event) => setKeyword(event.target.value)}
               placeholder="Tìm truyện..."
-              className="h-10 rounded-full px-4 text-sm w-64"
-              style={{ border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}
+              className="w-48 md:w-64 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+              style={{ background: 'var(--input-bg)', color: 'var(--text)', border: '1px solid var(--border)' }}
             />
-            {isFocused && suggestions.length > 0 && (
-              <div
-                className="absolute left-0 right-0 mt-2 rounded-2xl border shadow-lg overflow-hidden"
-                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-              >
-                {suggestions.map((story) => (
-                  <button
-                    key={story.id}
-                    type="button"
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => selectSuggestion(story)}
-                    className="w-full text-left px-4 py-2 text-sm hover:opacity-80"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    <div className="font-medium">{story.title}</div>
-                    {story.authorName && <div className="text-xs muted">{story.authorName}</div>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+            <button
+              type="submit"
+              className="px-3 py-2 rounded text-xs font-semibold"
+              style={{ border: '1px solid var(--border)', background: 'rgba(59, 130, 246, 0.15)', color: 'var(--text)' }}
+            >
+              Tìm
+            </button>
+          </form>
           <button
-            type="submit"
-            className="hidden sm:flex items-center justify-center h-10 px-4 rounded-full text-sm font-semibold"
-            style={{ background: 'var(--card)', color: 'var(--text)', border: '1px solid var(--border)' }}
+            type="button"
+            onClick={toggle}
+            className="px-3 py-2 rounded text-xs font-semibold"
+            style={{ border: '1px solid var(--border)', background: 'rgba(15, 23, 42, 0.12)', color: 'var(--text)' }}
+            aria-label={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
           >
-            Tìm
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-        </form>
-
-        <button
-          onClick={toggle}
-          className="flex items-center justify-center h-10 w-10 rounded-full border"
-          style={{ borderColor: 'var(--border)', background: 'var(--card)', color: 'var(--text)' }}
-          aria-label="Toggle theme"
-          title={theme === 'dark' ? 'Chuyển sang sáng' : 'Chuyển sang tối'}
-        >
-          {theme === 'dark' ? '☀' : '🌙'}
-        </button>
+        </div>
       </div>
     </header>
   )

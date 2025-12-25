@@ -28,13 +28,6 @@ const StoryCardCompact = ({ story }: { story: Story }) => {
         <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
           {story.authorName || 'N/A'}
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-          <span>{story.totalChapters ?? 0} chương</span>
-          <span className="h-1 w-1 rounded-full" style={{ background: 'var(--border)' }} />
-          <span className="px-2 py-0.5 rounded-full border text-[12px]" style={{ borderColor: 'rgba(59,130,246,0.35)' }}>
-            {story.storyStatus}
-          </span>
-        </div>
       </div>
       {story.hot && (
         <span

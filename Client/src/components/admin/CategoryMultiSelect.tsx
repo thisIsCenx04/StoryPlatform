@@ -36,10 +36,10 @@ const CategoryMultiSelect = ({ categories, selectedIds, onChange }: Props) => {
             </span>
           )
         })}
-        {!selectedIds.length && <span className="text-sm admin-muted">Ch06a ch69n</span>}
+        {!selectedIds.length && <span className="text-sm admin-muted">Chưa chọn</span>}
       </div>
       <select className="admin-input w-full" value="" onChange={(e) => add(e.target.value)}>
-        <option value="">-- Ch69n th69 lo55i --</option>
+        <option value="">-- Chọn thể loại --</option>
         {remaining.map((cat) => (
           <option key={cat.id} value={cat.id}>
             {cat.name}

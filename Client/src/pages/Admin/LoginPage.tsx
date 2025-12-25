@@ -21,21 +21,21 @@ const LoginPage = () => {
           <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
             StoryHub Admin
           </p>
-          <h1 className="text-2xl font-semibold">0300ng nh67p qu57n tr67</h1>
-          <p className="text-sm admin-muted mt-1">Vui lng dng ti kho57n qu57n tr67 0469 ti65p t63c.</p>
+          <h1 className="text-2xl font-semibold">Đăng nhập quản trị</h1>
+          <p className="text-sm admin-muted mt-1">Vui lòng dùng tài khoản quản trị để tiếp tục.</p>
         </div>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm mb-1">Tn 0400ng nh67p</label>
+            <label className="block text-sm mb-1">Tên đăng nhập</label>
             <input name="username" className="admin-input w-full" required />
           </div>
           <div>
-            <label className="block text-sm mb-1">M67t kh63u</label>
+            <label className="block text-sm mb-1">Mật khẩu</label>
             <input name="password" type="password" className="admin-input w-full" required />
           </div>
           {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
           <button type="submit" className="admin-button admin-button-primary w-full" disabled={loading}>
-            {loading ? '03ang 0400ng nh67p...' : '0300ng nh67p'}
+            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
       </div>

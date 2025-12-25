@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 const AdminRoute = () => {
   const { isAuthenticated, user } = useAuth()
   if (!isAuthenticated || user?.role !== 'ADMIN') {
-    return <Navigate to={apiConfig.adminLoginPagePath} replace />
+    return <Navigate to="/" replace />
   }
   return <Outlet />
 }

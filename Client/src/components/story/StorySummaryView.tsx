@@ -12,13 +12,15 @@ const StorySummaryView = ({ sections }: { sections: StorySummarySection[] }) => 
             </p>
           )}
           {section.imageUrl && (
-            <img
-              src={section.imageUrl}
-              alt=""
-              className="w-full rounded-lg"
-              style={{ border: '1px solid var(--border)' }}
-              loading="lazy"
-            />
+            <div className="w-full">
+              <img
+                src={section.imageUrl}
+                alt=""
+                className="w-full max-w-3xl rounded-lg object-contain mx-auto"
+                style={{ border: '1px solid var(--border)', maxHeight: '520px' }}
+                loading="lazy"
+              />
+            </div>
           )}
         </div>
       ))}

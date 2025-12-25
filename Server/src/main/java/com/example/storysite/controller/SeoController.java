@@ -24,12 +24,14 @@ public class SeoController {
 
     @GetMapping("/api/seo/organization")
     public ResponseEntity<SeoOrganizationDto> organization() {
-        return ResponseEntity.ok(seoService.getOrganization());
+        SeoOrganizationDto org = seoService.getOrganization();
+        return org != null ? ResponseEntity.ok(org) : ResponseEntity.noContent().build();
     }
 
     @GetMapping("/api/seo/article/{slug}")
     public ResponseEntity<SeoArticleDto> article(@PathVariable String slug) {
-        return ResponseEntity.ok(seoService.getArticleByStorySlug(slug));
+        SeoArticleDto article = seoService.getArticleByStorySlug(slug);
+        return article != null ? ResponseEntity.ok(article) : ResponseEntity.noContent().build();
     }
 
     @GetMapping("/api/seo/breadcrumb")
@@ -37,6 +39,7 @@ public class SeoController {
             @RequestParam(required = false) String pageType,
             @RequestParam(required = false) UUID refId,
             @RequestParam(required = false) String canonicalUrl) {
-        return ResponseEntity.ok(seoService.getBreadcrumb(pageType, refId, canonicalUrl));
+        SeoBreadcrumbListDto breadcrumb = seoService.getBreadcrumb(pageType, refId, canonicalUrl);
+        return breadcrumb != null ? ResponseEntity.ok(breadcrumb) : ResponseEntity.noContent().build();
     }
 }

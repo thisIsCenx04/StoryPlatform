@@ -30,8 +30,18 @@ public class SiteSettingsService {
 
     @Transactional
     public SiteSettingsDto update(SiteSettingsDto dto) {
+        if (dto == null) {
+            return getAdminSettings();
+        }
         SiteSettings settings = siteSettingsRepository.findById((short) 1).orElseGet(this::defaultSettings);
-        settingsMapper.updateEntity(dto, settings);
+        if (dto.getSiteName() != null) {
+            settings.setSiteName(dto.getSiteName());
+        }
+        if (dto.getAdminHiddenLoginPath() != null && !dto.getAdminHiddenLoginPath().isBlank()) {
+            settings.setAdminHiddenLoginPath(dto.getAdminHiddenLoginPath());
+        }
+        settings.setCopyProtectionEnabled(dto.isCopyProtectionEnabled());
+        settings.setScrapingProtectionEnabled(dto.isScrapingProtectionEnabled());
         siteSettingsRepository.save(settings);
         return settingsMapper.toDto(settings);
     }

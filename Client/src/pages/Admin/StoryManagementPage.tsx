@@ -18,7 +18,7 @@ const StoryManagementPage = () => {
       setStories(data)
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i danh sch truy63n')
+      setError(err instanceof Error ? err.message : 'Không thể tải danh sách truyện')
     } finally {
       setLoading(false)
     }
@@ -34,7 +34,7 @@ const StoryManagementPage = () => {
   }, [stories, keyword])
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Xa truy63n ny?')) return
+    if (!confirm('Xóa truyện này?')) return
     await storyApi.remove(id)
     load()
   }
@@ -57,7 +57,7 @@ const StoryManagementPage = () => {
       await storyApi.update(story.id, payload)
       load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kh00ng c67p nh67t 040661c tr55ng thi')
+      setError(err instanceof Error ? err.message : 'Không cập nhật được trạng thái')
     }
   }
 
@@ -69,13 +69,13 @@ const StoryManagementPage = () => {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
-            Truy63n
+            Truyện
           </p>
-          <h1 className="text-2xl font-semibold">Qu57n l05 truy63n</h1>
-          <p className="text-sm admin-muted">T55o m63i, ch65nh s61a, 04nh d59u n67i b67t.</p>
+          <h1 className="text-2xl font-semibold">Quản lý truyện</h1>
+          <p className="text-sm admin-muted">Tạo mới, chỉnh sửa, đánh dấu nổi bật.</p>
         </div>
         <Link to="/admin/stories/create" className="admin-button admin-button-primary">
-          Thm truy63n
+          Thêm truyện
         </Link>
       </div>
 
@@ -84,48 +84,58 @@ const StoryManagementPage = () => {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           className="admin-input w-full max-w-md"
-          placeholder="Tm ki65m truy63n..."
+          placeholder="Tìm kiếm truyện..."
         />
-        <span className="text-xs admin-muted">T67ng: {filtered.length}</span>
+        <span className="text-xs admin-muted">Tổng: {filtered.length}</span>
       </div>
 
       {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
-      {loading && <p className="text-sm admin-muted">03ang t57i...</p>}
+      {loading && <p className="text-sm admin-muted">Đang tải...</p>}
 
       <div className="admin-card overflow-x-auto">
         <table className="admin-table text-sm">
           <thead>
             <tr>
-              <th>Tn</th>
-              <th>Tr55ng thi</th>
+              <th className="min-w-[180px]">Tên</th>
+              <th>Trạng thái</th>
               <th>Hot</th>
-              <th>0367 c61</th>
-              <th className="text-right">Thao tc</th>
+              <th>Đề cử</th>
+              <th className="text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((story) => (
               <tr key={story.id}>
-                <td>{story.title}</td>
+                <td className="flex items-center gap-3">
+                  <span
+                    className="h-11 w-11 rounded-lg overflow-hidden flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.18), rgba(96,165,250,0.1))' }}
+                  >
+                    {story.coverImageUrl && (
+                      <img src={story.coverImageUrl} alt={story.title} className="h-full w-full object-cover" />
+                    )}
+                  </span>
+                  <span>{story.title}</span>
+                </td>
                 <td>
                   <StoryStatusBadge status={story.storyStatus} />
                 </td>
                 <td>
                   <button className={pillClass(story.hot)} onClick={() => toggleFlag(story, 'hot')}>
-                    {story.hot ? 'B67t' : 'T69t'}
+                    {story.hot ? 'Bật' : 'Tắt'}
                   </button>
                 </td>
                 <td>
                   <button className={pillClass(story.recommended)} onClick={() => toggleFlag(story, 'recommended')}>
-                    {story.recommended ? 'B67t' : 'T69t'}
+                    {story.recommended ? 'Bật' : 'Tắt'}
                   </button>
                 </td>
                 <td className="text-right space-x-3">
                   <Link className="text-sm" style={{ color: 'var(--accent)' }} to={`/admin/stories/${story.id}/edit`}>
-                    S61a
+                    Sửa
                   </Link>
                   <button className="text-sm" style={{ color: '#ff8b8b' }} onClick={() => handleDelete(story.id)}>
-                    Xa
+                    Xóa
                   </button>
                 </td>
               </tr>

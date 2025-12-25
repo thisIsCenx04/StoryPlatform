@@ -3,8 +3,10 @@ package com.example.storysite.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,5 +32,10 @@ public class StoryController {
     @GetMapping("/api/stories/{slug}")
     public ResponseEntity<StoryResponse> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(storyService.getBySlug(slug));
+    }
+
+    @PostMapping("/api/stories/{slug}/view")
+    public ResponseEntity<Long> trackView(@PathVariable String slug) {
+        return ResponseEntity.ok(storyService.trackView(slug));
     }
 }

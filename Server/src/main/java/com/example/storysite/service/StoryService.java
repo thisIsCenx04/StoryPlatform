@@ -81,6 +81,15 @@ public class StoryService {
     }
 
     @Transactional
+    public Long trackView(String slug) {
+        int updated = storyRepository.incrementViewCountBySlug(slug);
+        if (updated == 0) {
+            throw new ResourceNotFoundException("Story not found");
+        }
+        return storyRepository.findViewCountBySlug(slug).orElse(0L);
+    }
+
+    @Transactional
     public StoryResponse create(StoryRequest request) {
         String slug = generateUniqueSlug(request.getSlug(), request.getTitle(), null);
         Story story = storyMapper.toEntity(request);
@@ -129,6 +138,7 @@ public class StoryService {
 
     private void handleCategories(Story story, List<UUID> categoryIds) {
         storyCategoryRepository.deleteByStoryId(story.getId());
+        story.getCategories().clear();
         if (categoryIds != null) {
             for (UUID catId : categoryIds) {
                 Category category = categoryRepository.findById(catId)
@@ -138,6 +148,7 @@ public class StoryService {
                 link.setStory(story);
                 link.setCategory(category);
                 storyCategoryRepository.save(link);
+                story.getCategories().add(link);
             }
         }
     }
@@ -158,6 +169,7 @@ public class StoryService {
                 .map(storyMapper::toDto)
                 .toList();
         response.setSummarySections(sections);
+        response.setCategoryIds(storyCategoryRepository.findCategoryIdsByStoryId(story.getId()));
         return response;
     }
 

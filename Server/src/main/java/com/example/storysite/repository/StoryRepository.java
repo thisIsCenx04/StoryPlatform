@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.storysite.entity.Story;
@@ -15,4 +18,11 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
     List<Story> findByHotTrue();
     List<Story> findByRecommendedTrue();
     List<Story> findDistinctByCategoriesCategorySlug(String slug);
+
+    @Modifying
+    @Query("update Story s set s.viewCount = coalesce(s.viewCount, 0) + 1 where s.slug = :slug")
+    int incrementViewCountBySlug(@Param("slug") String slug);
+
+    @Query("select s.viewCount from Story s where s.slug = :slug")
+    Optional<Long> findViewCountBySlug(@Param("slug") String slug);
 }

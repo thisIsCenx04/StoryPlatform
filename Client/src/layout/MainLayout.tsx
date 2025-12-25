@@ -36,7 +36,7 @@ const MainLayout = () => {
       {organization && <OrganizationJsonLd organization={organization} />}
       <Header />
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 pt-0 pb-8">
-        {/* <Breadcrumb items={[{ label: 'Trang ch65', to: '/' }]} /> */}
+        {/* <Breadcrumb items={[{ label: 'Trang chủ', to: '/' }]} /> */}
         <Outlet />
       </main>
       <Footer />

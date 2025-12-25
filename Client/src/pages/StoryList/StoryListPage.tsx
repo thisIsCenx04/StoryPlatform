@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { storyApi } from '../../services/api/storyApi'
@@ -91,7 +91,7 @@ const StoryListPage = () => {
               Danh sách truyện
             </p>
             <h1 className="home-title text-3xl">Khám phá kho truyện</h1>
-            <p className="muted text-sm mt-1">L?c theo th? lo?i, tr?ng th?i v? ?? quan t?m.</p>
+            <p className="muted text-sm mt-1">Lọc theo thể loại, trạng thái và độ quan tâm.</p>
           </div>
           {keyword && (
             <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ const StoryListPage = () => {
                 className="px-3 py-1 rounded-full text-xs"
                 style={{ background: 'rgba(59, 130, 246, 0.15)', color: 'var(--text)' }}
               >
-                Kết qu?cho: {keyword}
+                Kết quả cho: {keyword}
               </span>
               <button className="text-xs hover:underline" style={{ color: 'var(--accent)' }} onClick={clearSearch}>
                 Xóa tìm kiếm
@@ -133,7 +133,7 @@ const StoryListPage = () => {
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold mb-2">Th? lo?i</h4>
+            <h4 className="text-sm font-semibold mb-2">Thể loại</h4>
             <div className="flex flex-wrap gap-2">
               {categories.map((cat) => (
                 <button
@@ -177,7 +177,7 @@ const StoryListPage = () => {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm muted">Hi?n th? {filtered.length} truy?n</p>
+            <p className="text-sm muted">Hiển thị {filtered.length} truyện</p>
           </div>
 
           {loading ? (
@@ -189,7 +189,7 @@ const StoryListPage = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center muted">Ch?a c? k?t qu? ph? h?p. H?y th? thay ??i b? l?c.</div>
+            <div className="text-center muted">Chưa có kết quả phù hợp. Hãy thử thay đổi bộ lọc.</div>
           )}
         </section>
       </div>
@@ -198,5 +198,3 @@ const StoryListPage = () => {
 }
 
 export default StoryListPage
-
-

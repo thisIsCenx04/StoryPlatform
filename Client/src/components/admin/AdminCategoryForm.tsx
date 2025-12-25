@@ -21,7 +21,7 @@ const AdminCategoryForm = ({ initial, onSubmit, onCancel }: Props) => {
     try {
       await onSubmit(form, initial?.id)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'L06u th59t b55i')
+      setError(err instanceof Error ? err.message : 'Lưu thất bại')
     } finally {
       setSaving(false)
     }
@@ -30,7 +30,7 @@ const AdminCategoryForm = ({ initial, onSubmit, onCancel }: Props) => {
   return (
     <form className="space-y-3" onSubmit={submit}>
       <div>
-        <label className="block text-sm mb-1">Tn</label>
+        <label className="block text-sm mb-1">Tên</label>
         <input
           className="admin-input w-full"
           value={form.name}
@@ -41,11 +41,11 @@ const AdminCategoryForm = ({ initial, onSubmit, onCancel }: Props) => {
       {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
       <div className="flex items-center gap-2">
         <button type="submit" className="admin-button admin-button-primary" disabled={saving}>
-          {saving ? '03ang l06u...' : 'L06u'}
+          {saving ? 'Đang lưu...' : 'Lưu'}
         </button>
         {onCancel && (
           <button type="button" className="admin-button admin-button-secondary" onClick={onCancel}>
-            H65y
+            Hủy
           </button>
         )}
       </div>

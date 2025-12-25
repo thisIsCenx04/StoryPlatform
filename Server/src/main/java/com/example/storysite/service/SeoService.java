@@ -9,7 +9,6 @@ import com.example.storysite.dto.seo.SeoBreadcrumbListDto;
 import com.example.storysite.dto.seo.SeoOrganizationDto;
 import com.example.storysite.entity.SeoArticle;
 import com.example.storysite.entity.SeoBreadcrumbList;
-import com.example.storysite.exception.ResourceNotFoundException;
 import com.example.storysite.mapper.SeoMapper;
 import com.example.storysite.repository.SeoArticleRepository;
 import com.example.storysite.repository.SeoBreadcrumbItemRepository;
@@ -38,13 +37,12 @@ public class SeoService {
     public SeoOrganizationDto getOrganization() {
         return seoOrganizationRepository.findFirstByOrderByCreatedAtDesc()
                 .map(seoMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+                .orElse(null);
     }
 
     public SeoArticleDto getArticleByStorySlug(String slug) {
-        SeoArticle article = seoArticleRepository.findByStorySlug(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("SEO article not found"));
-        return seoMapper.toDto(article);
+        SeoArticle article = seoArticleRepository.findByStorySlug(slug).orElse(null);
+        return article != null ? seoMapper.toDto(article) : null;
     }
 
     public SeoBreadcrumbListDto getBreadcrumb(String pageType, UUID refId, String canonicalUrl) {
@@ -53,11 +51,10 @@ public class SeoService {
             list = seoBreadcrumbListRepository.findTopByPageTypeAndPageRefId(pageType, refId).orElse(null);
         }
         if (list == null && canonicalUrl != null) {
-            list = seoBreadcrumbListRepository.findTopByCanonicalUrl(canonicalUrl)
-                    .orElseThrow(() -> new ResourceNotFoundException("Breadcrumb not found"));
+            list = seoBreadcrumbListRepository.findTopByCanonicalUrl(canonicalUrl).orElse(null);
         }
         if (list == null) {
-            throw new ResourceNotFoundException("Breadcrumb not found");
+            return null;
         }
         var items = seoBreadcrumbItemRepository.findByBreadcrumbListIdOrderByPositionAsc(list.getId());
         return seoMapper.toDtoWithItems(list, items);

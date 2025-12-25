@@ -7,16 +7,16 @@ interface Props {
 }
 
 const AdminCategoryList = ({ categories, onEdit, onDelete }: Props) => {
-  if (!categories.length) return <p className="text-sm admin-muted">Ch06a c th69 lo55i.</p>
+  if (!categories.length) return <p className="text-sm admin-muted">Chưa có thể loại.</p>
 
   return (
     <div className="admin-card overflow-x-auto">
       <table className="admin-table text-sm">
         <thead>
           <tr>
-            <th>Tn</th>
+            <th>Tên</th>
             <th>Slug</th>
-            <th className="text-right">Thao tc</th>
+            <th className="text-right">Thao tác</th>
           </tr>
         </thead>
         <tbody>
@@ -26,10 +26,10 @@ const AdminCategoryList = ({ categories, onEdit, onDelete }: Props) => {
               <td className="admin-muted">{cat.slug}</td>
               <td className="text-right space-x-3">
                 <button className="text-sm" style={{ color: 'var(--accent)' }} onClick={() => onEdit(cat)}>
-                  S61a
+                  Sửa
                 </button>
                 <button className="text-sm" style={{ color: '#ff8b8b' }} onClick={() => onDelete(cat.id)}>
-                  Xa
+                  Xóa
                 </button>
               </td>
             </tr>

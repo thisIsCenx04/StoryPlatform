@@ -15,7 +15,7 @@ const DonationManagementPage = () => {
       const data = await donationApi.adminList()
       setDonations(data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Kh00ng th69 t57i danh sch 65ng h61')
+      setError(err instanceof Error ? err.message : 'Không thể tải danh sách ủng hộ')
     } finally {
       setLoading(false)
     }
@@ -34,13 +34,13 @@ const DonationManagementPage = () => {
     <div className="space-y-6">
       <div>
         <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--accent)' }}>
-          64ng h61
+          Ủng hộ
         </p>
-        <h1 className="text-2xl font-semibold">Qu57n l05 65ng h61</h1>
-        <p className="text-sm admin-muted">Theo d01i tr55ng thi thanh ton t69 b55n 0469c.</p>
+        <h1 className="text-2xl font-semibold">Quản lý ủng hộ</h1>
+        <p className="text-sm admin-muted">Theo dõi trạng thái thanh toán từ bạn đọc.</p>
       </div>
       {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
-      {loading && <p className="text-sm admin-muted">03ang t57i...</p>}
+      {loading && <p className="text-sm admin-muted">Đang tải...</p>}
       <AdminDonationList donations={donations} onStatusChange={handleStatusChange} />
     </div>
   )

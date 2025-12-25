@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import type { SiteSettings } from '../../types/settings'
 
 interface Props {
@@ -20,9 +20,15 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
     setSaving(true)
     setError(null)
     try {
-      await onSubmit(form)
+      const trimmedPath = form.adminHiddenLoginPath.trim()
+      const normalizedPath = trimmedPath
+        ? trimmedPath.startsWith('/')
+          ? trimmedPath
+          : `/${trimmedPath}`
+        : '/__internal__/auth/login'
+      await onSubmit({ ...form, adminHiddenLoginPath: normalizedPath })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'C67p nh67t th59t b55i')
+      setError(err instanceof Error ? err.message : 'Cập nhật thất bại')
     } finally {
       setSaving(false)
     }
@@ -31,7 +37,7 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
   return (
     <form className="space-y-4" onSubmit={submit}>
       <div>
-        <label className="block text-sm mb-1">Tn site</label>
+        <label className="block text-sm mb-1">Tên site</label>
         <input
           className="admin-input w-full"
           value={form.siteName}
@@ -39,11 +45,19 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
         />
       </div>
       <div>
-        <label className="block text-sm mb-1">030665ng d65n login 63n (admin)</label>
+        <label className="block text-sm mb-1">Đường dẫn login ẩn (admin)</label>
         <input
           className="admin-input w-full"
           value={form.adminHiddenLoginPath}
-          onChange={(e) => setForm((prev) => ({ ...prev, adminHiddenLoginPath: e.target.value }))}
+          readOnly
+          aria-readonly="true"
+          style={{
+            background: '#f1f5f9',
+            color: '#64748b',
+            borderColor: '#d9e4f7',
+            boxShadow: 'none',
+            pointerEvents: 'none',
+          }}
         />
       </div>
       <div className="space-y-2">
@@ -53,7 +67,7 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
             checked={form.copyProtectionEnabled}
             onChange={(e) => setForm((prev) => ({ ...prev, copyProtectionEnabled: e.target.checked }))}
           />
-          B67t ch67n copy
+          Bật chặn copy
         </label>
         <label className="flex items-center gap-2 text-sm">
           <input
@@ -61,12 +75,12 @@ const AdminSettingsForm = ({ initial, onSubmit }: Props) => {
             checked={form.scrapingProtectionEnabled}
             onChange={(e) => setForm((prev) => ({ ...prev, scrapingProtectionEnabled: e.target.checked }))}
           />
-          B67t ch67n co
+          Bật chặn cào
         </label>
       </div>
       {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
       <button type="submit" className="admin-button admin-button-primary" disabled={saving}>
-        {saving ? '03ang l06u...' : 'L06u'}
+        {saving ? 'Đang lưu...' : 'Lưu'}
       </button>
     </form>
   )

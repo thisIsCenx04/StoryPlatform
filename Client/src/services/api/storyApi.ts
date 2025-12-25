@@ -23,6 +23,13 @@ export const storyApi = {
     return (await res.json()) as Story
   },
 
+  async trackView(slug: string): Promise<number | null> {
+    const res = await fetch(buildApiUrl(`/api/stories/${slug}/view`), { method: 'POST' })
+    if (!res.ok) return null
+    const val = await res.json()
+    return typeof val === 'number' ? val : null
+  },
+
   async adminList(): Promise<Story[]> {
     const res = await fetch(buildApiUrl('/api/admin/stories'), { headers: authHeaders() })
     if (!res.ok) throw new Error('Không th? t?i danh sách truy?n (admin)')

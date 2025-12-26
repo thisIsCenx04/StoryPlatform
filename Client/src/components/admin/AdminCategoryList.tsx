@@ -2,11 +2,12 @@ import type { Category } from '../../types/category'
 
 interface Props {
   categories: Category[]
+  storyCounts: Record<string, number>
   onEdit: (category: Category) => void
   onDelete: (id: string) => void
 }
 
-const AdminCategoryList = ({ categories, onEdit, onDelete }: Props) => {
+const AdminCategoryList = ({ categories, storyCounts, onEdit, onDelete }: Props) => {
   if (!categories.length) return <p className="text-sm admin-muted">Chưa có thể loại.</p>
 
   return (
@@ -15,7 +16,8 @@ const AdminCategoryList = ({ categories, onEdit, onDelete }: Props) => {
         <thead>
           <tr>
             <th>Tên</th>
-            <th>Slug</th>
+            <th>Thẻ slug</th>
+            <th className="text-center">Số truyện đang mở</th>
             <th className="text-right">Thao tác</th>
           </tr>
         </thead>
@@ -24,8 +26,9 @@ const AdminCategoryList = ({ categories, onEdit, onDelete }: Props) => {
             <tr key={cat.id}>
               <td>{cat.name}</td>
               <td className="admin-muted">{cat.slug}</td>
+              <td className="text-center">{storyCounts[cat.id] ?? 0}</td>
               <td className="text-right space-x-3">
-                <button className="text-sm" style={{ color: 'var(--accent)' }} onClick={() => onEdit(cat)}>
+                <button className="text-sm mr-5" style={{ color: 'var(--accent)' }} onClick={() => onEdit(cat)}>
                   Sửa
                 </button>
                 <button className="text-sm" style={{ color: '#ff8b8b' }} onClick={() => onDelete(cat.id)}>

@@ -28,6 +28,13 @@ public interface StoryRepository extends JpaRepository<Story, UUID> {
     Optional<Long> findViewCountBySlug(@Param("slug") String slug);
 
     @Modifying
+    @Query("update Story s set s.likeCount = coalesce(s.likeCount, 0) + 1 where s.slug = :slug")
+    int incrementLikeCountBySlug(@Param("slug") String slug);
+
+    @Query("select s.likeCount from Story s where s.slug = :slug")
+    Optional<Long> findLikeCountBySlug(@Param("slug") String slug);
+
+    @Modifying
     @Query("update Story s set s.hot = true where s.slug = :slug and s.hot = false")
     int markHotBySlug(@Param("slug") String slug);
 }

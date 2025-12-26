@@ -19,14 +19,20 @@ const StoryCard = ({ story, categories = [] }: Props) => {
 
   return (
     <div className="card rounded-lg overflow-hidden flex flex-col shadow-sm min-h-[360px] max-h-[360px]">
-      {story.coverImageUrl && (
-        <img src={story.coverImageUrl} alt={story.title} className="h-48 w-full object-cover" loading="lazy" />
-      )}
-      <div className="p-4 flex-1 flex flex-col gap-2">
-        <div className="flex items-center justify-end gap-2 text-xs">
-          {story.hot && <span className="px-2 py-1 rounded bg-red-500 text-white">Hot</span>}
-          {story.recommended && <span className="px-2 py-1 rounded bg-cyan-500 text-white">Đề cử</span>}
-        </div>
+      <div className="relative">
+        {story.coverImageUrl ? (
+          <img src={story.coverImageUrl} alt={story.title} className="h-48 w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="h-48 w-full" style={{ background: 'var(--surface)' }} />
+        )}
+        {(story.hot || story.recommended) && (
+          <div className="absolute right-3 top-3 flex items-center gap-2 text-xs">
+            {story.recommended && <span className="px-2 py-1 rounded bg-cyan-500 text-white">Đề cử</span>}
+            {story.hot && <span className="px-2 py-1 rounded bg-red-500 text-white">Top xem</span>}
+          </div>
+        )}
+      </div>
+      <div className="px-4 pb-4 pt-3 flex-1 flex flex-col gap-2">
         <Link
           to={`/stories/${story.slug}`}
           className="text-lg font-semibold hover:text-emerald-400 line-clamp-2"
@@ -56,7 +62,19 @@ const StoryCard = ({ story, categories = [] }: Props) => {
           </div>
         )}
         <p className="text-sm muted line-clamp-2">{story.shortDescription}</p>
-        <div className="text-xs muted mt-auto">Tác giả: {story.authorName || 'N/A'}</div>
+        <div className="text-sm font-semibold mt-auto flex items-center justify-between gap-3" style={{ color: 'var(--text)' }}>
+          <span>Tác giả {story.authorName || 'N/A'}</span>
+          <span className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              <span aria-hidden="true">👁</span>
+              {story.viewCount ?? 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <span aria-hidden="true">❤</span>
+              {story.likeCount ?? 0}
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   )

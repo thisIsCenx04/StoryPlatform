@@ -38,4 +38,9 @@ public class StoryController {
     public ResponseEntity<Long> trackView(@PathVariable String slug) {
         return ResponseEntity.ok(storyService.trackView(slug));
     }
+
+    @PostMapping("/api/stories/{slug}/like")
+    public ResponseEntity<Long> trackLike(@PathVariable String slug) {
+        return ResponseEntity.ok(storyService.trackLike(slug));
+    }
 }

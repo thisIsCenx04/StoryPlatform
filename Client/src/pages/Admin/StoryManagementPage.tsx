@@ -118,7 +118,7 @@ const StoryManagementPage = () => {
                   </button>
                 </td>
                 <td className="text-right space-x-3">
-                  <Link className="text-sm" style={{ color: 'var(--accent)' }} to={`/admin/stories/${story.id}/edit`}>
+                  <Link className="text-sm mr-4" style={{ color: 'var(--accent)' }} to={`/admin/stories/${story.id}/edit`}>
                     Sửa
                   </Link>
                   <button className="text-sm" style={{ color: '#ff8b8b' }} onClick={() => handleDelete(story.id)}>

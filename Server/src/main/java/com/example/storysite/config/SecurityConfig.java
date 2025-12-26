@@ -50,7 +50,7 @@ public class SecurityConfig {
                                 "/api/settings/public",
                                 "/api/public/**")
                         .permitAll()
-                        .requestMatchers("/api/stories/*/view").permitAll()
+                        .requestMatchers("/api/stories/*/view", "/api/stories/*/like").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

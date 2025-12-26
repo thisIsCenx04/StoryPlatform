@@ -7,6 +7,7 @@ import type { Category } from '../types/category'
 
 const DROPDOWN_OPEN_DELAY_MS = 120
 const DROPDOWN_CLOSE_DELAY_MS = 200
+const CATEGORY_ROWS = 10
 
 const Header = () => {
   const { theme, toggle } = useTheme()
@@ -46,12 +47,13 @@ const Header = () => {
   }, [categories])
 
   const categoryColumns = useMemo(() => {
-    const chunkSize = 10
-    const chunks: Category[][] = []
-    for (let i = 0; i < sortedCategories.length; i += chunkSize) {
-      chunks.push(sortedCategories.slice(i, i + chunkSize))
-    }
-    return chunks
+    const columnCount = Math.max(1, Math.ceil(sortedCategories.length / CATEGORY_ROWS))
+    return Array.from({ length: columnCount }, (_, colIndex) => {
+      return Array.from({ length: CATEGORY_ROWS }, (_, rowIndex) => {
+        const itemIndex = colIndex * CATEGORY_ROWS + rowIndex
+        return sortedCategories[itemIndex] ?? null
+      })
+    })
   }, [sortedCategories])
 
   const scheduleOpen = () => {
@@ -127,19 +129,35 @@ const Header = () => {
             >
               <div className="surface rounded-xl p-3 shadow-lg">
                 {categoryColumns.length ? (
-                  <div className="grid gap-6 text-sm" style={{ gridAutoFlow: 'column', gridAutoColumns: 'minmax(160px, 1fr)' }}>
+                  <div
+                    className="grid gap-6 text-sm"
+                    style={{ gridTemplateColumns: `repeat(${categoryColumns.length}, minmax(160px, 1fr))` }}
+                  >
                     {categoryColumns.map((column, colIndex) => (
-                      <div key={`col-${colIndex}`} className="grid gap-1">
-                        {column.map((category) => (
-                          <Link
-                            key={category.id}
-                            to={`/categories?category=${encodeURIComponent(category.slug)}`}
-                            className="px-2 py-1 rounded hover:bg-slate-100/10 transition"
-                            style={{ color: 'var(--text)' }}
-                          >
-                            {category.name}
-                          </Link>
-                        ))}
+                      <div
+                        key={`col-${colIndex}`}
+                        className="grid gap-1"
+                        style={{ gridTemplateRows: `repeat(${CATEGORY_ROWS}, minmax(0, 1fr))` }}
+                      >
+                        {column.map((category, rowIndex) =>
+                          category ? (
+                            <Link
+                              key={category.id}
+                              to={`/categories?category=${encodeURIComponent(category.slug)}`}
+                              className="px-2 py-1 rounded hover:bg-slate-100/10 transition"
+                              style={{ color: 'var(--text)' }}
+                            >
+                              {category.name}
+                            </Link>
+                          ) : (
+                            <div
+                              key={`empty-${colIndex}-${rowIndex}`}
+                              className="px-2 py-1"
+                              style={{ minHeight: '28px' }}
+                              aria-hidden="true"
+                            />
+                          )
+                        )}
                       </div>
                     ))}
                   </div>

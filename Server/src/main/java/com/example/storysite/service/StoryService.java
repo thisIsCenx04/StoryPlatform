@@ -95,6 +95,15 @@ public class StoryService {
     }
 
     @Transactional
+    public Long trackLike(String slug) {
+        int updated = storyRepository.incrementLikeCountBySlug(slug);
+        if (updated == 0) {
+            throw new ResourceNotFoundException("Story not found");
+        }
+        return storyRepository.findLikeCountBySlug(slug).orElse(0L);
+    }
+
+    @Transactional
     public StoryResponse create(StoryRequest request) {
         String slug = generateUniqueSlug(request.getSlug(), request.getTitle(), null);
         Story story = storyMapper.toEntity(request);

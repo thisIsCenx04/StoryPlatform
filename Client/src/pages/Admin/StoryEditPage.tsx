@@ -41,7 +41,6 @@ const StoryEditPage = () => {
           Truyện
         </p>
         <h1 className="text-2xl font-semibold">Chỉnh sửa truyện</h1>
-        <p className="text-sm admin-muted">Cập nhật nội dung, phân loại và trạng thái.</p>
       </div>
       <StoryForm initialValue={story} onSubmit={handleSubmit} />
     </div>

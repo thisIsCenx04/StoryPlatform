@@ -1,12 +1,14 @@
-import React from 'react'
+﻿import React from 'react'
 
 import AdminCategoryForm from '../../components/admin/AdminCategoryForm'
 import AdminCategoryList from '../../components/admin/AdminCategoryList'
 import { categoryApi } from '../../services/api/categoryApi'
+import { storyApi } from '../../services/api/storyApi'
 import type { Category, CategoryPayload } from '../../types/category'
 
 const CategoryManagementPage = () => {
   const [categories, setCategories] = React.useState<Category[]>([])
+  const [storyCounts, setStoryCounts] = React.useState<Record<string, number>>({})
   const [editing, setEditing] = React.useState<Category | null>(null)
   const [keyword, setKeyword] = React.useState('')
   const [error, setError] = React.useState<string | null>(null)
@@ -14,8 +16,18 @@ const CategoryManagementPage = () => {
 
   const load = async () => {
     try {
-      const data = await categoryApi.listAdmin()
-      setCategories(data)
+      const [categoryData, storyList] = await Promise.all([
+        categoryApi.listAdmin(),
+        storyApi.adminList(),
+      ])
+      setCategories(categoryData)
+      const counts: Record<string, number> = {}
+      storyList.forEach((story) => {
+        story.categoryIds?.forEach((id) => {
+          counts[id] = (counts[id] ?? 0) + 1
+        })
+      })
+      setStoryCounts(counts)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Không thể tải thể loại')
     }
@@ -37,9 +49,21 @@ const CategoryManagementPage = () => {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Xóa thể loại này?')) return
-    await categoryApi.remove(id)
-    load()
+    const count = storyCounts[id] ?? 0
+    if (count > 0) {
+      alert(`Không thể xóa thể loại này vì đang có ${count} truyện.`)
+      return
+    }
+    const target = categories.find((cat) => cat.id === id)
+    const name = target?.name ?? 'thể loại'
+    if (!confirm(`Xóa thể loại "${name}"?`)) return
+    try {
+      await categoryApi.remove(id)
+      alert('Đã xóa thể loại thành công.')
+      load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Không thể xóa thể loại')
+    }
   }
 
   const filtered = keyword
@@ -64,7 +88,6 @@ const CategoryManagementPage = () => {
             Thể loại
           </p>
           <h1 className="text-2xl font-semibold">Quản lý thể loại</h1>
-          <p className="text-sm admin-muted">Thêm mới, chỉnh sửa, sắp xếp danh mục.</p>
         </div>
         <button className="admin-button admin-button-primary" onClick={startCreate}>
           + Thêm thể loại
@@ -83,7 +106,12 @@ const CategoryManagementPage = () => {
 
       {error && <p className="text-sm" style={{ color: '#ff8b8b' }}>{error}</p>}
 
-      <AdminCategoryList categories={filtered} onEdit={startEdit} onDelete={handleDelete} />
+      <AdminCategoryList
+        categories={filtered}
+        storyCounts={storyCounts}
+        onEdit={startEdit}
+        onDelete={handleDelete}
+      />
 
       {modalOpen && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -105,3 +133,4 @@ const CategoryManagementPage = () => {
 }
 
 export default CategoryManagementPage
+

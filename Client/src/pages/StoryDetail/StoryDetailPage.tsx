@@ -18,7 +18,8 @@ const StoryDetailPage = () => {
   const [articleSeo, setArticleSeo] = useState<SeoArticle | null>(null)
   const [breadcrumb, setBreadcrumb] = useState<SeoBreadcrumbList | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
-  const [relatedStories, setRelatedStories] = useState<Story[]>([])
+  const [allStories, setAllStories] = useState<Story[]>([])
+  const [isLiking, setIsLiking] = useState(false)
 
   useEffect(() => {
     if (!slug) return
@@ -51,21 +52,9 @@ const StoryDetailPage = () => {
     storyApi
       .list()
       .then((list) => {
-        const related = list.filter(
-          (item) =>
-            item.slug !== story.slug &&
-            item.categoryIds?.some((id) => story.categoryIds?.includes(id))
-        )
-        related.sort((a, b) => {
-          if (a.recommended !== b.recommended) return a.recommended ? -1 : 1
-          if (a.hot !== b.hot) return a.hot ? -1 : 1
-          const viewDiff = (b.viewCount ?? 0) - (a.viewCount ?? 0)
-          if (viewDiff !== 0) return viewDiff
-          return a.title.localeCompare(b.title, 'vi')
-        })
-        setRelatedStories(related.slice(0, 6))
+        setAllStories(list.filter((item) => item.slug !== story.slug))
       })
-      .catch(() => setRelatedStories([]))
+      .catch(() => setAllStories([]))
   }, [story])
 
   const categoryNames = useMemo(
@@ -73,8 +62,48 @@ const StoryDetailPage = () => {
     [categories, story?.categoryIds]
   )
 
+  const recommendedStories = useMemo(
+    () => allStories.filter((item) => item.recommended).slice(0, 6),
+    [allStories]
+  )
+
+  const sameCategoryStories = useMemo(() => {
+    if (!story?.categoryIds?.length) return []
+    return allStories
+      .filter((item) => item.categoryIds?.some((id) => story.categoryIds?.includes(id)))
+      .sort((a, b) => {
+        if (a.recommended !== b.recommended) return a.recommended ? -1 : 1
+        if (a.hot !== b.hot) return a.hot ? -1 : 1
+        const viewDiff = (b.viewCount ?? 0) - (a.viewCount ?? 0)
+        if (viewDiff !== 0) return viewDiff
+        return a.title.localeCompare(b.title, 'vi')
+      })
+      .slice(0, 6)
+  }, [allStories, story?.categoryIds])
+
+  const topViewStories = useMemo(
+    () =>
+      [...allStories]
+        .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+        .slice(0, 6),
+    [allStories]
+  )
+
   if (error) return <p className="text-red-600">{error}</p>
   if (!story) return <p className="muted">Đang tải...</p>
+
+  const handleLike = async () => {
+    if (!story || isLiking) return
+    setIsLiking(true)
+    try {
+      const count = await storyApi.trackLike(story.slug)
+      if (typeof count === 'number') {
+        setStory((prev) => (prev ? { ...prev, likeCount: count } : prev))
+      }
+    } finally {
+      setIsLiking(false)
+    }
+  }
 
   return (
     <article className="space-y-6" style={{ color: 'var(--text)' }}>
@@ -84,13 +113,13 @@ const StoryDetailPage = () => {
       <section className="surface rounded-2xl p-6 border">
         <div className="grid gap-6 md:grid-cols-[240px_1fr]">
           <div
-            className="rounded-xl overflow-hidden border"
+            className="rounded-xl overflow-hidden border aspect-[3/4]"
             style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
           >
             {story.coverImageUrl ? (
               <img src={story.coverImageUrl} alt={story.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="h-full min-h-[320px] flex items-center justify-center text-sm muted">
+              <div className="h-full flex items-center justify-center text-sm muted">
                 Chưa có ảnh bìa
               </div>
             )}
@@ -131,7 +160,16 @@ const StoryDetailPage = () => {
                   <span aria-hidden="true">❤️</span>
                   Lượt thích
                 </div>
-                <div className="text-lg font-semibold">{story.likeCount ?? 0}</div>
+                <button
+                  type="button"
+                  onClick={handleLike}
+                  className="text-lg font-semibold flex items-center gap-2"
+                  style={{ color: '#ef4444' }}
+                  aria-label="Thích truyện"
+                  disabled={isLiking}
+                >
+                  ❤ {story.likeCount ?? 0}
+                </button>
               </div>
             </div>
 
@@ -147,17 +185,45 @@ const StoryDetailPage = () => {
         </div>
       </section>
 
-      <section className="surface rounded-2xl p-6 border">
-        <h2 className="text-xl font-semibold mb-4">Truyện liên quan</h2>
-        {relatedStories.length ? (
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {relatedStories.map((item) => (
-              <StoryCard key={item.id} story={item} categories={categories} />
-            ))}
-          </div>
-        ) : (
-          <p className="muted">Chưa có truyện liên quan.</p>
-        )}
+      <section className="surface rounded-2xl p-6 border space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Truyện đề xuất</h2>
+          {recommendedStories.length ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {recommendedStories.map((item) => (
+                <StoryCard key={item.id} story={item} categories={categories} />
+              ))}
+            </div>
+          ) : (
+            <p className="muted">Chưa có truyện đề xuất.</p>
+          )}
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Cùng thể loại</h2>
+          {sameCategoryStories.length ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {sameCategoryStories.map((item) => (
+                <StoryCard key={item.id} story={item} categories={categories} />
+              ))}
+            </div>
+          ) : (
+            <p className="muted">Chưa có truyện cùng thể loại.</p>
+          )}
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Nhiều lượt xem</h2>
+          {topViewStories.length ? (
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {topViewStories.map((item) => (
+                <StoryCard key={item.id} story={item} categories={categories} />
+              ))}
+            </div>
+          ) : (
+            <p className="muted">Chưa có dữ liệu lượt xem.</p>
+          )}
+        </div>
       </section>
     </article>
   )

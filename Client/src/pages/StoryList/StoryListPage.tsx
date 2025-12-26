@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
+import type { PointerEvent } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { storyApi } from '../../services/api/storyApi'
@@ -6,6 +7,10 @@ import { categoryApi } from '../../services/api/categoryApi'
 import StoryCard from '../../components/story/StoryCard'
 import type { Story } from '../../types/story'
 import type { Category } from '../../types/category'
+
+const BANNER_INTERVAL_MS = 5500
+const BANNER_TRANSITION_MS = 420
+const BANNER_SWIPE_THRESHOLD_PX = 60
 
 const StoryListPage = () => {
   const location = useLocation()
@@ -15,6 +20,9 @@ const StoryListPage = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [bannerIndex, setBannerIndex] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStartX, setDragStartX] = useState(0)
+  const [dragDelta, setDragDelta] = useState(0)
 
   useEffect(() => {
     setLoading(true)
@@ -48,16 +56,50 @@ const StoryListPage = () => {
     () => (curatedStories.length ? curatedStories : hotStories.length ? hotStories : filteredStories.slice(0, 6)),
     [curatedStories, hotStories, filteredStories]
   )
-  const bannerStory = bannerStories[bannerIndex]
+  const slides: Array<Story | null> = bannerStories.length ? bannerStories : [null]
 
   useEffect(() => {
     if (!bannerStories.length) return
     setBannerIndex(0)
+  }, [bannerStories.length])
+
+  useEffect(() => {
+    if (!bannerStories.length || isDragging) return
     const timer = setInterval(() => {
       setBannerIndex((idx) => (idx + 1) % bannerStories.length)
-    }, 6000)
+    }, BANNER_INTERVAL_MS)
     return () => clearInterval(timer)
-  }, [bannerStories.length])
+  }, [bannerStories.length, isDragging])
+
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (bannerStories.length <= 1) return
+    setIsDragging(true)
+    setDragStartX(event.clientX)
+    setDragDelta(0)
+  }
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (!isDragging) return
+    setDragDelta(event.clientX - dragStartX)
+  }
+
+  const handlePointerUp = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+    if (!bannerStories.length) return
+    if (Math.abs(dragDelta) > BANNER_SWIPE_THRESHOLD_PX) {
+      setBannerIndex((idx) => {
+        if (dragDelta < 0) return (idx + 1) % bannerStories.length
+        return (idx - 1 + bannerStories.length) % bannerStories.length
+      })
+    }
+    setDragDelta(0)
+  }
+
+  const handleSelect = (idx: number) => {
+    setBannerIndex(idx)
+    setDragDelta(0)
+  }
 
   const sections = useMemo(() => {
     return categories
@@ -71,36 +113,82 @@ const StoryListPage = () => {
 
   return (
     <section className="space-y-10" style={{ color: 'var(--text)' }}>
-      <div className="relative">
+      <div className="relative -mt-8">
         <div
-          key={bannerStory?.id || 'hero'}
-          className="home-hero relative overflow-hidden rounded-3xl p-8 md:p-12 banner-fade"
-          style={{
-            backgroundImage: bannerStory?.coverImageUrl
-              ? `linear-gradient(120deg, rgba(15, 28, 46, 0.15), rgba(15, 28, 46, 0.65)), url(${bannerStory.coverImageUrl})`
-              : undefined,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
+          className="relative overflow-hidden rounded-3xl"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={{ touchAction: 'pan-y' }}
         >
-          <div className="absolute inset-0 home-gridline opacity-40 pointer-events-none" />
-          <div className="relative flex items-end min-h-[210px] md:min-h-[280px]">
-            {bannerStory && (
-              <div className="home-glass rounded-2xl p-5 max-w-xl fade-in-up" key={bannerStory.id}>
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/90">
-                  {bannerStory.recommended && (
-                    <span className="px-3 py-1 rounded-full bg-blue-600/90 text-white shadow-sm">Đề cử</span>
-                  )}
-                  {bannerStory.hot && <span className="px-3 py-1 rounded-full bg-rose-500/90 text-white shadow-sm">Hot</span>}
+          <div
+            className="flex"
+            style={{
+              transform: `translateX(calc(-${bannerIndex * 100}% + ${dragDelta}px))`,
+              transition: isDragging ? 'none' : `transform ${BANNER_TRANSITION_MS}ms ease`,
+            }}
+          >
+            {slides.map((story, idx) => (
+              <div key={story?.id ?? `hero-${idx}`} className="min-w-full">
+                <div
+                  className="home-hero relative overflow-hidden p-8 md:p-12 banner-fade"
+                  style={{
+                    backgroundImage: story?.coverImageUrl
+                      ? `linear-gradient(120deg, rgba(15, 28, 46, 0.15), rgba(15, 28, 46, 0.65)), url(${story.coverImageUrl})`
+                      : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                >
+                  <div className="absolute inset-0 home-gridline opacity-40 pointer-events-none" />
+                  <div className="relative flex items-center min-h-[210px] md:min-h-[280px]">
+                    {story && (
+                      <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div
+                          className="home-glass rounded-2xl p-5 max-w-3xl fade-in-up"
+                          style={{ background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(8px)' }}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div
+                              className="w-28 md:w-32 aspect-[3/4] rounded-xl overflow-hidden border"
+                              style={{ borderColor: 'rgba(255,255,255,0.35)' }}
+                            >
+                              {story.coverImageUrl ? (
+                                <img src={story.coverImageUrl} alt={story.title} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full" style={{ background: 'rgba(255,255,255,0.2)' }} />
+                              )}
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/90">
+                                {story.recommended && (
+                                  <span className="px-3 py-1 rounded-full bg-blue-600/90 text-white shadow-sm">Đề cử</span>
+                                )}
+                                {story.hot && (
+                                  <span className="px-3 py-1 rounded-full bg-rose-500/90 text-white shadow-sm">Top xem</span>
+                                )}
+                              </div>
+                              <div className="text-2xl md:text-3xl font-semibold text-white drop-shadow-sm">
+                                {story.title}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 text-sm text-white/85">
+                                <span>Tác giả: {story.authorName || 'N/A'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-sm text-white/85 leading-relaxed line-clamp-4 md:max-w-[280px] lg:max-w-[320px]">
+                          {story.shortDescription || 'Chưa có mô tả ngắn.'}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="text-2xl md:text-3xl font-semibold mt-3 text-white drop-shadow-sm">
-                  {bannerStory.title}
-                </div>
-                <div className="flex flex-wrap items-center gap-2 text-sm text-white/85 mt-2">
-                  <span>Tác giả: {bannerStory.authorName || 'N/A'}</span>
-                </div>
+
               </div>
-            )}
+            ))}
           </div>
         </div>
 
@@ -110,7 +198,7 @@ const StoryListPage = () => {
               <button
                 key={story.id}
                 type="button"
-                onClick={() => setBannerIndex(idx)}
+                onClick={() => handleSelect(idx)}
                 className="h-2 w-6 rounded-full"
                 style={{
                   background: idx === bannerIndex ? 'var(--accent)' : 'rgba(59, 130, 246, 0.25)',
@@ -160,3 +248,4 @@ const StoryListPage = () => {
 }
 
 export default StoryListPage
+

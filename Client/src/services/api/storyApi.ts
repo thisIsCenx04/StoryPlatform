@@ -30,6 +30,13 @@ export const storyApi = {
     return typeof val === 'number' ? val : null
   },
 
+  async trackLike(slug: string): Promise<number | null> {
+    const res = await fetch(buildApiUrl(`/api/stories/${slug}/like`), { method: 'POST' })
+    if (!res.ok) return null
+    const val = await res.json()
+    return typeof val === 'number' ? val : null
+  },
+
   async adminList(): Promise<Story[]> {
     const res = await fetch(buildApiUrl('/api/admin/stories'), { headers: authHeaders() })
     if (!res.ok) throw new Error('Không thể tải danh sách truyện (admin)')

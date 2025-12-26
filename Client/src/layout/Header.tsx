@@ -29,10 +29,8 @@ const Header = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const q = params.get('q') ?? ''
-    if (q !== keyword) {
-      setKeyword(q)
-    }
-  }, [keyword, location.search])
+    setKeyword(q)
+  }, [location.search])
 
   useEffect(() => {
     return () => {

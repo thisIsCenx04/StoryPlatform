@@ -25,6 +25,7 @@ import com.example.storysite.repository.CategoryRepository;
 import com.example.storysite.repository.StoryCategoryRepository;
 import com.example.storysite.repository.StoryRepository;
 import com.example.storysite.repository.StorySummarySectionRepository;
+import com.example.storysite.service.SeoContentService;
 
 @Service
 public class StoryService {
@@ -35,15 +36,17 @@ public class StoryService {
     private final StoryCategoryRepository storyCategoryRepository;
     private final CategoryRepository categoryRepository;
     private final StoryMapper storyMapper;
+    private final SeoContentService seoContentService;
 
     public StoryService(StoryRepository storyRepository, StorySummarySectionRepository summarySectionRepository,
             StoryCategoryRepository storyCategoryRepository, CategoryRepository categoryRepository,
-            StoryMapper storyMapper) {
+            StoryMapper storyMapper, SeoContentService seoContentService) {
         this.storyRepository = storyRepository;
         this.summarySectionRepository = summarySectionRepository;
         this.storyCategoryRepository = storyCategoryRepository;
         this.categoryRepository = categoryRepository;
         this.storyMapper = storyMapper;
+        this.seoContentService = seoContentService;
     }
 
     public List<StoryResponse> listPublic(Boolean hot, Boolean recommended) {
@@ -106,6 +109,7 @@ public class StoryService {
         Story saved = storyRepository.save(story);
         handleCategories(saved, request.getCategoryIds());
         handleSummarySections(saved, request.getSummarySections());
+        seoContentService.upsertStorySeo(saved);
         return toResponseWithSections(saved);
     }
 
@@ -127,6 +131,7 @@ public class StoryService {
 
         handleCategories(saved, request.getCategoryIds());
         handleSummarySections(saved, request.getSummarySections());
+        seoContentService.upsertStorySeo(saved);
 
         return toResponseWithSections(saved);
     }

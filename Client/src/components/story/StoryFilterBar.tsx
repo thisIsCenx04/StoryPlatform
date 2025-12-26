@@ -1,8 +1,12 @@
-﻿interface Props {
+import { useRef } from 'react'
+
+interface Props {
   onFilter: (filters: { hot?: boolean; recommended?: boolean; keyword?: string }) => void
 }
 
 const StoryFilterBar = ({ onFilter }: Props) => {
+  const formRef = useRef<HTMLFormElement | null>(null)
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
@@ -13,8 +17,13 @@ const StoryFilterBar = ({ onFilter }: Props) => {
     })
   }
 
+  const handleClear = () => {
+    formRef.current?.reset()
+    onFilter({ keyword: '', hot: false, recommended: false })
+  }
+
   return (
-    <form className="surface flex flex-wrap items-center gap-3 rounded-lg p-3 mb-4" onSubmit={handleSubmit}>
+    <form ref={formRef} className="surface flex flex-wrap items-center gap-3 rounded-lg p-3 mb-4" onSubmit={handleSubmit}>
       <input
         name="keyword"
         placeholder="Tìm kiếm truyện..."
@@ -33,6 +42,14 @@ const StoryFilterBar = ({ onFilter }: Props) => {
         style={{ border: '1px solid var(--border)' }}
       >
         Lọc
+      </button>
+      <button
+        type="button"
+        onClick={handleClear}
+        className="px-4 py-2 rounded text-sm font-medium"
+        style={{ border: '1px solid var(--border)', color: 'var(--text)' }}
+      >
+        Xóa
       </button>
     </form>
   )

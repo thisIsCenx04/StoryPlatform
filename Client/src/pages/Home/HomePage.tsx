@@ -24,7 +24,11 @@ const HomePage = () => {
       let data = await storyApi.list({ hot: filters?.hot, recommended: filters?.recommended })
       if (filters?.keyword) {
         const keyword = filters.keyword.toLowerCase()
-        data = data.filter((s) => s.title.toLowerCase().includes(keyword))
+        data = data.filter((s) => {
+          const title = s.title?.toLowerCase() ?? ''
+          const author = s.authorName?.toLowerCase() ?? ''
+          return title.includes(keyword) || author.includes(keyword)
+        })
       }
       setStories(data)
     } catch (err) {

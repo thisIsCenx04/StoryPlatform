@@ -39,7 +39,11 @@ const StoryListPage = () => {
   const filteredStories = useMemo(() => {
     if (!keyword.trim()) return stories
     const kw = keyword.toLowerCase()
-    return stories.filter((story) => story.title.toLowerCase().includes(kw))
+    return stories.filter((story) => {
+      const title = story.title?.toLowerCase() ?? ''
+      const author = story.authorName?.toLowerCase() ?? ''
+      return title.includes(kw) || author.includes(kw)
+    })
   }, [keyword, stories])
 
   const hotStories = useMemo(() => filteredStories.filter((s) => s.hot).slice(0, 6), [filteredStories])

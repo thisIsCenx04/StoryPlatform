@@ -11,4 +11,5 @@ import com.example.storysite.entity.SeoBreadcrumbItem;
 @Repository
 public interface SeoBreadcrumbItemRepository extends JpaRepository<SeoBreadcrumbItem, UUID> {
     List<SeoBreadcrumbItem> findByBreadcrumbListIdOrderByPositionAsc(UUID breadcrumbListId);
+    void deleteByBreadcrumbListId(UUID breadcrumbListId);
 }

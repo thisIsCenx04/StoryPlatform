@@ -11,4 +11,5 @@ import com.example.storysite.entity.SeoArticle;
 @Repository
 public interface SeoArticleRepository extends JpaRepository<SeoArticle, UUID> {
     Optional<SeoArticle> findByStorySlug(String slug);
+    Optional<SeoArticle> findByStoryId(UUID storyId);
 }

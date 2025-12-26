@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -64,6 +66,7 @@ public class SeoOrganization {
     private String addressCountry;
 
     @Column(name = "same_as", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     private String sameAsJson;
 
     @Column(name = "created_at", nullable = false)

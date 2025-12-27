@@ -67,21 +67,25 @@ const HomePage = () => {
     return () => clearInterval(timer)
   }, [bannerStories.length])
 
-  const trendStories = useMemo(() => {
-    const map = new Map<string, Story>()
-    const pool = [...hotStories, ...curatedStories, ...stories]
-    for (const story of pool) {
-      if (!map.has(story.id)) {
-        map.set(story.id, story)
-      }
-      if (map.size >= 5) break
-    }
-    return Array.from(map.values())
-  }, [curatedStories, hotStories, stories])
-  const featuredStories = useMemo(
-    () => (curatedStories.length ? curatedStories : stories).slice(0, 4),
-    [curatedStories, stories]
-  )
+  const topReadStories = useMemo(() => {
+    return [...stories]
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .slice(0, 4)
+  }, [stories])
+
+  const featuredStories = useMemo(() => {
+    if (!topReadStories.length) return []
+    const topIds = new Set(topReadStories.map((story) => story.id))
+    const categoryIds = new Set<string>()
+    topReadStories.forEach((story) => {
+      story.categoryIds?.forEach((id) => categoryIds.add(id))
+    })
+    return stories
+      .filter((story) => !topIds.has(story.id))
+      .filter((story) => story.hot && story.categoryIds?.some((id) => categoryIds.has(id)))
+      .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+      .slice(0, 4)
+  }, [stories, topReadStories])
 
   const breadcrumb = createSimpleBreadcrumb([
     { name: 'Trang chủ', url: typeof window !== 'undefined' ? window.location.href : '/' },
@@ -169,7 +173,7 @@ const HomePage = () => {
             </p>
           </div>
           <div className="grid gap-3">
-            {trendStories.map((story) => (
+            {topReadStories.map((story) => (
               <StoryCardCompact key={story.id} story={story} />
             ))}
           </div>

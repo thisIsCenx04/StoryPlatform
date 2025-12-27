@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/api/settings/public",
                                 "/api/public/**")
                         .permitAll()
+                        .requestMatchers("/api/donations", "/api/payments/**").permitAll()
                         .requestMatchers("/api/stories/*/view").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

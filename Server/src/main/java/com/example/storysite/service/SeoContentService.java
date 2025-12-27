@@ -106,6 +106,7 @@ public class SeoContentService {
         SeoBreadcrumbList saved = seoBreadcrumbListRepository.save(list);
 
         seoBreadcrumbItemRepository.deleteByBreadcrumbListId(saved.getId());
+        seoBreadcrumbItemRepository.flush();
         List<SeoBreadcrumbItem> items = new ArrayList<>();
         items.add(buildBreadcrumbItem(saved, 1, "Trang chủ", trimTrailingSlash(baseUrl)));
         items.add(buildBreadcrumbItem(saved, 2, story.getTitle(), canonicalUrl));

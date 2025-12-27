@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 import Header from './Header'
 import Footer from './Footer'
@@ -14,16 +14,36 @@ import { useTheme } from '../hooks/useTheme'
 const MainLayout = () => {
   const [copyProtection, setCopyProtection] = useState(true)
   const [organization, setOrganization] = useState<SeoOrganization | null>(null)
+  const [siteTitle, setSiteTitle] = useState(() => {
+    if (typeof window === 'undefined') return ''
+    return window.localStorage.getItem('siteName') || ''
+  })
   const [showBackToTop, setShowBackToTop] = useState(false)
   const { theme } = useTheme()
+  const location = useLocation()
   useCopyProtection(copyProtection)
 
   useEffect(() => {
     settingsApi
       .getPublicSettings()
-      .then((s) => setCopyProtection(s.copyProtectionEnabled))
+      .then((s) => {
+        setCopyProtection(s.copyProtectionEnabled)
+        if (s.siteName) {
+          setSiteTitle(s.siteName)
+          window.localStorage.setItem('siteName', s.siteName)
+        }
+      })
       .catch(() => setCopyProtection(true))
   }, [])
+
+  useEffect(() => {
+    if (!siteTitle) return
+    document.title = siteTitle
+  }, [siteTitle])
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [location.pathname])
 
   useEffect(() => {
     seoApi
@@ -59,9 +79,9 @@ const MainLayout = () => {
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 px-4 py-2 rounded-full shadow-md text-sm font-semibold"
           style={{ background: 'var(--accent)', color: '#fff' }}
-          aria-label="Lên đầu trang"
+          aria-label={'\u004C\u00EA\u006E\u0020\u0111\u1EA7\u0075\u0020\u0074\u0072\u0061\u006E\u0067'}
         >
-          ↑ Lên đầu trang
+          {'\u2191 \u004C\u00EA\u006E\u0020\u0111\u1EA7\u0075\u0020\u0074\u0072\u0061\u006E\u0067'}
         </button>
       )}
       <Footer />

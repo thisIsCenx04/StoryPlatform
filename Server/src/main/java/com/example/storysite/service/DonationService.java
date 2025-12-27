@@ -13,6 +13,8 @@ import com.example.storysite.exception.ResourceNotFoundException;
 import com.example.storysite.mapper.DonationMapper;
 import com.example.storysite.repository.DonationRepository;
 
+import java.math.BigDecimal;
+
 @Service
 public class DonationService {
 
@@ -45,5 +47,32 @@ public class DonationService {
         donation.setStatus(status);
         donationRepository.save(donation);
         return donationMapper.toResponse(donation);
+    }
+
+    public Donation createPendingDonation(String donorName, BigDecimal amount, String currency, String message, String paymentMethod) {
+        Donation donation = Donation.builder()
+                .donorName(donorName)
+                .amount(amount)
+                .currency(currency)
+                .message(message)
+                .paymentMethod(paymentMethod)
+                .status(DonationStatus.PENDING)
+                .build();
+        return donationRepository.save(donation);
+    }
+
+    public Donation updatePayment(UUID id, DonationStatus status, String paymentTxnId) {
+        Donation donation = donationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Donation not found"));
+        donation.setStatus(status);
+        if (paymentTxnId != null && !paymentTxnId.isBlank()) {
+            donation.setPaymentTxnId(paymentTxnId);
+        }
+        return donationRepository.save(donation);
+    }
+
+    public Donation findByPaymentTxnId(String paymentTxnId) {
+        return donationRepository.findByPaymentTxnId(paymentTxnId)
+                .orElseThrow(() -> new ResourceNotFoundException("Donation not found"));
     }
 }

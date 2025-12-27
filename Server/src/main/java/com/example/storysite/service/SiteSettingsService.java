@@ -21,6 +21,7 @@ public class SiteSettingsService {
 
     public SiteSettingsDto getPublicSettings() {
         SiteSettings settings = siteSettingsRepository.findById((short) 1).orElseGet(this::defaultSettings);
+        settings = ensureProtectionEnabled(settings);
         return settingsMapper.toDto(settings);
     }
 
@@ -37,11 +38,14 @@ public class SiteSettingsService {
         if (dto.getSiteName() != null) {
             settings.setSiteName(dto.getSiteName());
         }
+        if (dto.getLogoUrl() != null) {
+            settings.setLogoUrl(dto.getLogoUrl());
+        }
         if (dto.getAdminHiddenLoginPath() != null && !dto.getAdminHiddenLoginPath().isBlank()) {
             settings.setAdminHiddenLoginPath(dto.getAdminHiddenLoginPath());
         }
-        settings.setCopyProtectionEnabled(dto.isCopyProtectionEnabled());
-        settings.setScrapingProtectionEnabled(dto.isScrapingProtectionEnabled());
+        settings.setCopyProtectionEnabled(true);
+        settings.setScrapingProtectionEnabled(true);
         siteSettingsRepository.save(settings);
         return settingsMapper.toDto(settings);
     }
@@ -54,5 +58,14 @@ public class SiteSettingsService {
         s.setCopyProtectionEnabled(true);
         s.setScrapingProtectionEnabled(true);
         return siteSettingsRepository.save(s);
+    }
+
+    private SiteSettings ensureProtectionEnabled(SiteSettings settings) {
+        if (!settings.isCopyProtectionEnabled() || !settings.isScrapingProtectionEnabled()) {
+            settings.setCopyProtectionEnabled(true);
+            settings.setScrapingProtectionEnabled(true);
+            return siteSettingsRepository.save(settings);
+        }
+        return settings;
     }
 }

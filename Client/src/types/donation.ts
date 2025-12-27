@@ -14,3 +14,9 @@ export interface Donation extends DonationPayload {
   status: DonationStatus
   createdAt: string
 }
+
+export interface PaymentCheckoutResponse {
+  donationId: string
+  paymentUrl: string
+  provider: string
+}

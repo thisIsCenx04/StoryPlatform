@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class SiteSettingsDto {
     private String siteName;
     private String adminHiddenLoginPath;
+    private String logoUrl;
     private boolean copyProtectionEnabled;
     private boolean scrapingProtectionEnabled;
 }

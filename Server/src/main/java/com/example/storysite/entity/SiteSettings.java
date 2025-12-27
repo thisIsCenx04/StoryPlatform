@@ -32,6 +32,9 @@ public class SiteSettings {
     @Column(name = "admin_hidden_login_path", length = 255)
     private String adminHiddenLoginPath;
 
+    @Column(name = "logo_url", columnDefinition = "text")
+    private String logoUrl;
+
     @Column(name = "copy_protection_enabled", nullable = false)
     private boolean copyProtectionEnabled = true;
 

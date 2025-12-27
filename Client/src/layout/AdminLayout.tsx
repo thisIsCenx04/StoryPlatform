@@ -14,8 +14,8 @@ const AdminLayout = () => {
   const linkCls = (path: string) => `admin-nav-link ${location.pathname.startsWith(path) ? 'active' : ''}`
 
   return (
-    <div className="admin-shell flex">
-      <aside className="admin-sidebar w-64 flex flex-col shadow-sm">
+    <div className="admin-shell flex min-h-screen">
+      <aside className="admin-sidebar w-64 flex flex-col shadow-sm h-screen sticky top-0">
         <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="admin-brand text-xl font-semibold">StoryHub Admin</div>
           <p className="text-xs admin-muted mt-1">Quản trị nội dung & vận hành</p>
@@ -37,7 +37,7 @@ const AdminLayout = () => {
             Cài đặt
           </Link>
         </nav>
-        <div className="px-5 py-4 border-t text-sm flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <div className="px-5 py-4 border-t text-sm flex items-center justify-between mt-auto" style={{ borderColor: 'var(--border)' }}>
           <span className="admin-muted">Đang đăng nhập</span>
           <button className="admin-button admin-button-danger" onClick={logout}>
             Đăng xuất

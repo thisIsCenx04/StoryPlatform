@@ -2,8 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { categoryApi } from '../services/api/categoryApi'
+import { settingsApi } from '../services/api/settingsApi'
 import { useTheme } from '../hooks/useTheme'
 import type { Category } from '../types/category'
+import type { SiteSettings } from '../types/settings'
 
 const DROPDOWN_OPEN_DELAY_MS = 120
 const DROPDOWN_CLOSE_DELAY_MS = 200
@@ -16,6 +18,7 @@ const Header = () => {
   const [categories, setCategories] = useState<Category[]>([])
   const [keyword, setKeyword] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [settings, setSettings] = useState<SiteSettings | null>(null)
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -24,6 +27,13 @@ const Header = () => {
       .list()
       .then((data) => setCategories(data))
       .catch(() => setCategories([]))
+  }, [])
+
+  useEffect(() => {
+    settingsApi
+      .getPublicSettings()
+      .then(setSettings)
+      .catch(() => setSettings(null))
   }, [])
 
   useEffect(() => {
@@ -74,6 +84,15 @@ const Header = () => {
     navigate(`/stories${value ? `?q=${encodeURIComponent(value)}` : ''}`)
   }
 
+  const handleLogoClick = () => {
+    if (location.pathname === '/' && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const siteName = settings?.siteName || 'StoryHub'
+  const logoUrl = settings?.logoUrl || ''
+
   return (
     <header
       className="sticky top-0 z-20 shadow-sm"
@@ -83,13 +102,19 @@ const Header = () => {
         backdropFilter: 'blur(8px)',
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-6 text-sm" style={{ color: 'var(--text)' }}>
+      <div className="max-w-6xl mx-auto px-4 py-5 flex items-center gap-6 text-sm" style={{ color: 'var(--text)' }}>
         <Link
           to="/"
-          className="text-lg font-semibold tracking-wide hover:opacity-90 px-2 py-1 rounded-md"
-          style={{ color: 'var(--text)', background: 'rgba(59, 130, 246, 0.12)' }}
+          onClick={handleLogoClick}
+          className="hover:opacity-90 p-1 rounded-md flex items-center"
+          style={{ background: 'rgba(59, 130, 246, 0.12)' }}
+          aria-label={siteName}
         >
-          StoryHub
+          {logoUrl ? (
+            <img src={logoUrl} alt={siteName} className="h-12 w-12 rounded object-cover" />
+          ) : (
+            <span className="h-12 w-12 rounded-md" style={{ background: 'rgba(59, 130, 246, 0.35)' }} />
+          )}
         </Link>
 
         <nav className="flex items-center gap-4">
@@ -147,7 +172,7 @@ const Header = () => {
               </div>
             </div>
           </div>
-          <Link
+          {/* <Link
             to="/donate"
             className={`px-1 py-1 transition-colors ${isActive('/donate') ? 'font-semibold border-b-2 pb-1' : ''}`}
             style={
@@ -157,7 +182,7 @@ const Header = () => {
             }
           >
             Ủng hộ
-          </Link>
+          </Link> */}
         </nav>
 
         <div className="ml-auto flex items-center gap-3">

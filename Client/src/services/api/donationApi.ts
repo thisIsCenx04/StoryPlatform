@@ -1,6 +1,6 @@
 import { buildApiUrl } from '../../config/apiConfig'
 import { authStore } from '../../store/authStore'
-import type { Donation, DonationPayload, DonationStatus } from '../../types/donation'
+import type { Donation, DonationPayload, DonationStatus, PaymentCheckoutResponse } from '../../types/donation'
 
 const authHeaders = (): Record<string, string> => {
   const user = authStore.getUser()
@@ -16,6 +16,15 @@ export const donationApi = {
     })
     if (!res.ok) throw new Error('Tạo donate thất bại')
     return (await res.json()) as Donation
+  },
+  async checkout(payload: DonationPayload): Promise<PaymentCheckoutResponse> {
+    const res = await fetch(buildApiUrl('/api/payments/checkout'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    if (!res.ok) throw new Error('T\u1EA1o giao d\u1ECBch thanh to\u00E1n th\u1EA5t b\u1EA1i')
+    return (await res.json()) as PaymentCheckoutResponse
   },
   async adminList(): Promise<Donation[]> {
     const res = await fetch(buildApiUrl('/api/admin/donations'), { headers: authHeaders() })

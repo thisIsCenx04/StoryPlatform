@@ -125,7 +125,7 @@ const HomePage = () => {
                 </div>
                 <div className="mt-4">
                   <Link
-                    to={`/stories/${bannerStory.slug}/read`}
+                    to={`/stories/${bannerStory.slug}`}
                     className="px-4 py-2 rounded-full font-semibold shadow-sm"
                     style={{
                       background: '#fff',

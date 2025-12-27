@@ -1,6 +1,7 @@
 import { buildApiUrl } from '../../config/apiConfig'
 import type { Story, StoryRequestPayload, StorySummarySection } from '../../types/story'
 import { authStore } from '../../store/authStore'
+import { cachedGetJson, invalidateCache } from './requestCache'
 
 const authHeaders = (): Record<string, string> => {
   const user = authStore.getUser()
@@ -12,15 +13,19 @@ export const storyApi = {
     const query = new URLSearchParams()
     if (params?.hot) query.append('hot', 'true')
     if (params?.recommended) query.append('recommended', 'true')
-    const res = await fetch(buildApiUrl(`/api/stories${query.toString() ? `?${query.toString()}` : ''}`))
-    if (!res.ok) throw new Error('Không thể tải danh sách truyện')
-    return (await res.json()) as Story[]
+    const url = buildApiUrl(`/api/stories${query.toString() ? `?${query.toString()}` : ''}`)
+    return cachedGetJson(url, {
+      ttlMs: 30 * 1000,
+      errorMessage: 'Không thể tải danh sách truyện',
+    })
   },
 
   async getBySlug(slug: string): Promise<Story> {
-    const res = await fetch(buildApiUrl(`/api/stories/${slug}`))
-    if (!res.ok) throw new Error('Không tìm thấy truyện')
-    return (await res.json()) as Story
+    const url = buildApiUrl(`/api/stories/${slug}`)
+    return cachedGetJson(url, {
+      ttlMs: 30 * 1000,
+      errorMessage: 'Không tìm thấy truyện',
+    })
   },
 
   async trackView(slug: string): Promise<number | null> {
@@ -49,7 +54,9 @@ export const storyApi = {
       body: JSON.stringify(payload),
     })
     if (!res.ok) throw new Error('Tạo truyện thất bại')
-    return (await res.json()) as Story
+    const data = (await res.json()) as Story
+    invalidateCache(buildApiUrl('/api/stories'))
+    return data
   },
 
   async update(id: string, payload: StoryRequestPayload): Promise<Story> {
@@ -59,7 +66,10 @@ export const storyApi = {
       body: JSON.stringify(payload),
     })
     if (!res.ok) throw new Error('Cập nhật truyện thất bại')
-    return (await res.json()) as Story
+    const data = (await res.json()) as Story
+    invalidateCache(buildApiUrl('/api/stories'))
+    invalidateCache(buildApiUrl(`/api/stories/${id}`))
+    return data
   },
 
   async remove(id: string): Promise<void> {
@@ -68,6 +78,7 @@ export const storyApi = {
       headers: authHeaders(),
     })
     if (!res.ok) throw new Error('Xóa truyện thất bại')
+    invalidateCache(buildApiUrl('/api/stories'))
   },
 
   async getSummary(id: string) {

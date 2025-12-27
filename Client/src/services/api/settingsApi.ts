@@ -1,6 +1,7 @@
-﻿import { buildApiUrl } from '../../config/apiConfig'
+import { buildApiUrl } from '../../config/apiConfig'
 import { authStore } from '../../store/authStore'
 import type { SiteSettings } from '../../types/settings'
+import { cachedGetJson, invalidateCache } from './requestCache'
 
 const authHeaders = (): Record<string, string> => {
   const user = authStore.getUser()
@@ -14,9 +15,10 @@ const readError = async (res: Response) => {
 
 export const settingsApi = {
   async getPublicSettings(): Promise<SiteSettings> {
-    const res = await fetch(buildApiUrl('/api/settings/public'))
-    if (!res.ok) throw new Error(await readError(res))
-    return (await res.json()) as SiteSettings
+    return cachedGetJson(buildApiUrl('/api/settings/public'), {
+      ttlMs: 5 * 60 * 1000,
+      errorMessage: 'Không tải được cài đặt',
+    })
   },
   async getAdminSettings(): Promise<SiteSettings> {
     const res = await fetch(buildApiUrl('/api/admin/settings'), { headers: authHeaders() })
@@ -30,6 +32,8 @@ export const settingsApi = {
       body: JSON.stringify(payload),
     })
     if (!res.ok) throw new Error(await readError(res))
-    return (await res.json()) as SiteSettings
+    const data = (await res.json()) as SiteSettings
+    invalidateCache(buildApiUrl('/api/settings/public'))
+    return data
   },
 }
